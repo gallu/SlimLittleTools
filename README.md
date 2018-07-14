@@ -2,6 +2,14 @@
 
 Slim Framework用の、比較的小さなツール群です。
 
+## インストールについて
+
+```
+composer require gallu/slim-littie-tools
+```
+
+でインストールしてください。
+
 ## ./:
 
 ### StaticBase.php
