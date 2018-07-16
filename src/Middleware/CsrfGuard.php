@@ -13,6 +13,12 @@ class CsrfGuard extends Guard
 {
     public function __invoke($request, $response, callable $next)
     {
+        // null時の処理
+        // XXX determineRouteBeforeAppMiddleware=true であっても、groupの時にnullが来る事があるから
+        if (null === $request->getAttribute('route')) {
+            return $next($request, $response);
+        }
+
         // route名の把握
         $route_name = $request->getAttribute('route')->getName();
 
