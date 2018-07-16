@@ -11,4 +11,6 @@ $app->add(new Cookie($app->getContainer()));
 $app->add(new SlimLittleToolsUse($app->getContainer()));
 
 //
+$CSRF_not_covered_list = [
+];
 $app->add((new CsrfGuard())->setNotCoveredList($CSRF_not_covered_list));
