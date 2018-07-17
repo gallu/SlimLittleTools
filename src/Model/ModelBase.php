@@ -415,7 +415,7 @@ class ModelBase
         foreach($guard as $k) {
             //
             if ( (isset($data[$k]))&&($data[$k] !== $this->get($k)) ) {
-var_dump($data[$k], $this->get($k) );
+//var_dump($data[$k], $this->get($k) );
                 throw new ModelGuardException("guardによってガードされた値は変更できません({$k})");
             }
         }
