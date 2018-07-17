@@ -3,6 +3,7 @@
 namespace SlimLittleTools\Middleware;
 
 use Slim\Csrf\Guard;
+use SlimLittleTools\Libs\Config;
 
 /**
  * Slim PHP micro frameworkでCookieを読み書きするための、シンプルなミドルウェア
@@ -13,10 +14,16 @@ class CsrfGuard extends Guard
 {
     public function __invoke($request, $response, callable $next)
     {
+        // determineRouteBeforeAppMiddlewareの確認
+        if (false === Config::get('determineRouteBeforeAppMiddleware', false)) {
+            throw new \ErrorException('settingのdetermineRouteBeforeAppMiddlewareは明示的にtrueである必要があります');
+        }
+
         // null時の処理
         // XXX determineRouteBeforeAppMiddleware=true であっても、groupの時にnullが来る事があるから
         if (null === $request->getAttribute('route')) {
-            return $next($request, $response);
+            // 念のため通常の「CSRFチェック」を行う
+            return parent::__invoke($request, $response, $next);
         }
 
         // route名の把握
