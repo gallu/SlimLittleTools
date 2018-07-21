@@ -81,7 +81,8 @@ class TestModelMultiKey extends ModelBase
 class TestModelAutoIncrement extends ModelBase
 {
     protected $table = 'mode_3';
-    protected $auto_increment = treu; // AUTO_INCREMENTがPKなテーブル
+    protected $pk = 'mode_3_id';
+    protected $auto_increment = true; // AUTO_INCREMENTがPKなテーブル
     protected $created_at = true; // デフォルト名
     protected $updated_at = true; // デフォルト名
 }
@@ -111,7 +112,7 @@ class ModelTest extends \PHPUnit\Framework\TestCase
                     'host' => 'localhost',
                     'database' => 'slim_tools',
                     'user' => 'slim_tools',
-                    'pass' => 'XXXX',
+                    'pass' => 'XXXXXX',
                     'charset' => 'utf8mb4',
                     'options' => [\PDO::ATTR_EMULATE_PREPARES => false],
                 ],
@@ -141,6 +142,9 @@ class ModelTest extends \PHPUnit\Framework\TestCase
     // -----------------------------------------------
     public function testAll()
     {
+        // 先にお掃除
+        $dbh = DB::getHandle();
+        $dbh->query('delete from mode_1;');
 
         // checkPkの確認
         // 単キー 2種
@@ -197,9 +201,9 @@ class ModelTest extends \PHPUnit\Framework\TestCase
 
         // auto_incrementの確認
         // insert
+        $obj3 = TestModelAutoIncrement::insert(['val' => 'test']);
         // find
-        $this->assertSame('', '');
-        $this->assertSame('', '');
+        $this->assertSame(is_numeric($obj3->mode_3_id), true);
 
         // トランザクションの確認
         $this->assertSame('', ''); // isTran()

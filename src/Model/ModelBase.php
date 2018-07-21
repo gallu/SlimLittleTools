@@ -275,7 +275,11 @@ class ModelBase
     public static function insert($data, $forced_flg = false) {
         // 禁止項目チェック
         if ( (true === static::getProperty('auto_increment'))&&(false === $forced_flg) ) {
-            throw new ModelGuardException();
+            // 「AUTO_INCREMENTがtrueで、keyが単一で、$dataにそのkeyが入っている」が全部満たされたらNG
+            // XXX 複合主キーでAUTO_INCREMENT、の時は一端ノータッチ: そのうち「カラム名が指定できる」とかにしようかなぁ？
+            if ( (is_string(static::getProperty('pk')))&&(isset($data[static::getProperty('pk')])) ) {
+                throw new ModelGuardException();
+            }
         }
 
         // created_at / updated_atチェック
@@ -314,6 +318,11 @@ class ModelBase
         foreach($data as $k=> $v) {
             $self->set($k, $v);
         }
+        // AUTO_INCREMENT なら、インスタンスに値を取得しておく
+        if ( (true === static::getProperty('auto_increment')) && (is_string(static::getProperty('pk'))) ) {
+            $self->set(static::getProperty('pk'), $dbh->lastInsertId());
+        }
+
         //
         return $self;
     }
