@@ -155,4 +155,8 @@ $modelObj = ModelClass::findBy(['no_key1' => 1, 'no_key2' = 2]);
 なお、findByは一端「1レコード」を想定しています。
 「全レコード」を取得したい場合は「findByAll()」メソッドを利用してください。使い方は一緒ですが、returnがSlimLittleTools\Model\ModelCollectionクラス(ほぼarrayObject。toArray()メソッドだけ生やしてある)が帰ってきます。
 
+## 削除
 
+削除は「インスタンスの中にある主キーを削除」します。
+
+`$modelObj->delete();`
