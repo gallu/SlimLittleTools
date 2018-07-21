@@ -9,6 +9,7 @@ use SlimLittleTools\Exception\DbException;
 use SlimLittleTools\Libs\DB;
 use SlimLittleTools\Libs\Filter;
 use SlimLittleTools\Libs\Validator;
+use SlimLittleTools\Model\ModelCollection;
 
 
 class ModelBase
@@ -24,11 +25,11 @@ class ModelBase
     protected $guard = ['name', 'name', ...];
 
     // いわゆるcreated_at / updated_atがあるとき、ここに指定があればそのカラム名に日付を追加で入れる
-    protected $created_at = ''; // insert時のみ
-    protected $updated_at = ''; // insert 及び update時
+    // booleanでtrueが入っている場合は、デフォルトの文字列を使う(created_at/updated_at)
+    protected $created_at = 'created_at'; // insert時のみ
+    protected $updated_at = 'updated_at'; // insert 及び update時
 
     // PKがAUTO_INCREMENTのみのテーブルで、ここに明示的にtrueがあったら「insertの時にPKが指定されていたら例外を吐く」「insert後、PDO::lastInsertIdでとれる値をPKのカラムに入れる」を行う
-    // XXX 現状は(多分)未実装だけど、「第二引数に明示的にtrueを書いたら、PKが書いてあっても例外吐かない」的な実装を、将来するかも
     protected $auto_increment = true;
 
     // DB suffix
@@ -346,13 +347,24 @@ class ModelBase
     }
 
     /**
-     * 簡易的な検索用メソッド
+     * 簡易的な検索用メソッド(1レコード)
      *
      * @param $p1 string|hash 値がstringの場合「検索のカラム名」となり、$p2がその値となる。値がhashの場合「カラム名と値」の配列となり、ANDで検索する
      * @param $p2 string $p1の値がstringの場合、$p2がその値となる。値がhashの場合は使われない
-     * @return obj ModelBaseを継承した、Modelクラス
+     * @return obj ModelBaseを継承した、Modelクラスのインスタンス。見つからない場合はnull
      */
     public static function findBy($p1, $p2 = null) {
+        $r = static::findByAll($p1, $p2);
+        return (0 === count($r))? null : $r[0];
+    }
+    /**
+     * 簡易的な検索用メソッド(全レコード)
+     *
+     * @param $p1 string|hash 値がstringの場合「検索のカラム名」となり、$p2がその値となる。値がhashの場合「カラム名と値」の配列となり、ANDで検索する
+     * @param $p2 string $p1の値がstringの場合、$p2がその値となる。値がhashの場合は使われない
+     * @return obj ModelCollectionインスタンス(中にはModelBaseを継承した、Modelクラスのインスタンス)。見つからない場合は空のModelCollectionインスタンス
+     */
+    public static function findByAll($p1, $p2 = null) {
         //
         if (is_string($p1)) {
             $where = [$p1 => $p2];
@@ -385,18 +397,23 @@ class ModelBase
             return null;
         }
         // else
-        $data = $r->fetch(\PDO::FETCH_ASSOC);
-        if (false === $data) {
-            return null;
+        $data = $r->fetchAll(\PDO::FETCH_ASSOC);
+        if ((false === $data)||([] === $data)) {
+            return new ModelCollection();
         }
+
         // データがあったぽいのでインスタンス作ってreturn
-        $obj = new static();
-        $data = static::selectFilter($data); // データを一旦フィルタリング
-        foreach($data as $k => $v) {
-            $obj->set($k, $v);
+        $ret = new ModelCollection();
+        foreach($data as $datum) {
+            $obj = new static();
+            $datum = static::selectFilter($datum); // データを一旦フィルタリング
+            foreach($datum as $k => $v) {
+                $obj->set($k, $v);
+            }
+            $ret[] = $obj;
         }
         //
-        return $obj;
+        return $ret;
     }
 
 

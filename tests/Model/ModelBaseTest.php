@@ -205,6 +205,13 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         // find
         $this->assertSame(is_numeric($obj3->mode_3_id), true);
 
+        //
+        $data = TestModelAutoIncrement::findByAll('val', 'test');
+        $this->assertLessThanOrEqual(count($data->toArray()), 1);
+        //
+        $data = TestModelAutoIncrement::findByAll(['val' => 'testdummy']);
+        $this->assertSame(count($data->toArray()), 0);
+
         // トランザクションの確認
         $this->assertSame('', ''); // isTran()
         // begin
