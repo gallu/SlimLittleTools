@@ -10,6 +10,7 @@ use SlimLittleTools\Libs\Http\Request;
 //
 use Slim\Http\Environment;
 use Slim\Http\Response;
+use SlimLittleTools\Libs\Config;
 
 class CsrfGuardTest extends \PHPUnit\Framework\TestCase
 {
@@ -60,6 +61,7 @@ class CsrfGuardTest extends \PHPUnit\Framework\TestCase
 
         // Instantiate the application
         $app = new \Slim\App($settings);
+        Config::setContainer($app->getContainer()); // settingsのチェックをconfigクラス経由でやっているので、必須
 
         // Set up dependencies
 
