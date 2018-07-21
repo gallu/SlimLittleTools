@@ -4,5 +4,6 @@ composer.lock
 phpunit.xml
 
 #
+.swp
 .php_cs.cache
 php-cs-fixer
