@@ -30,7 +30,7 @@ class Cookie extends WithContainerBase
                     $cobj->setDefaults($settings['cookie']);
                 } else {
                     // これだけは設定しておく
-                    $path = $request->getUri()->getBasePath();
+                    $path = $this->container->get('request')->getUri()->getBasePath();
                     if ('' === $path) {
                         $path = '/';
                     }
