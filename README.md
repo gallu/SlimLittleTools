@@ -140,3 +140,28 @@ ConfigやDBなど、いくつかのLibs内のクラスが有効に働くよう�
 Slim-Skeleton 系で「src」の中によく入っているコードの「推奨サンプル」になります。    
 ほかに必要な設定もあるかと思うので、コピペして使うとよいと思います。   
 
+## 戻り値の早見表
+
+### Model
+
+<dl>
+  <dt>insert
+    <dd>null / 自身のインスタンス
+  <dt>update
+    <dd>false / true
+  <dt>delete
+    <dd>false / PDOStatementインスタンス
+  <dt>find / findBy
+    <dd>null / 自身のインスタンス
+  <dt>findByAll
+    <dd>null / ModelCollectionインスタンス
+</dl>
+
+### PDO
+
+<dl>
+  <dt>preparedQuery
+    <dd>false / PDOStatementインスタンス
+</dl>
+
+
