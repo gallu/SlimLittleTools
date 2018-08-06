@@ -486,10 +486,6 @@ class ModelBase
         if (false === $r) {
             return false;
         }
-        // 影響行数の確認(１固定でよいかし？？)
-        if (1 != $r->rowCount()) {
-            return false;
-        }
         // else
         foreach($data as $k => $v) {
             $this->set($k, $v);
