@@ -4,7 +4,6 @@ namespace SlimLittleTools\Libs;
 
 use SlimLittleTools\Exception\DbException;
 
-
 /**
  * PDO拡張クラス(拡張自体はできるだけ最低限に)
  */
@@ -20,7 +19,7 @@ class PDO extends \PDO
         // XXX 当面、MySQLとPostgreSQLのみをサポート
         if (0 === strncasecmp($dsn, 'mysql:', strlen('mysql:'))) {
             $this->escape_token = '`';
-        } else if (0 === strncasecmp($dsn, 'pgsql:', strlen('pgsql:'))) {
+        } elseif (0 === strncasecmp($dsn, 'pgsql:', strlen('pgsql:'))) {
             $this->escape_token = '"';
         } else {
             throw new DbException('現在、MySQL/PostgreSQL以外のDBはサポートしておりません申し訳ないです');
@@ -39,7 +38,7 @@ class PDO extends \PDO
     {
         // validate
         $len = strlen($s);
-        for($i = 0; $i < $len; ++$i) {
+        for ($i = 0; $i < $len; ++$i) {
             if (true === ctype_alnum($s[$i])) {
                 continue;
             }
@@ -103,19 +102,24 @@ class PDO extends \PDO
      */
     public function preparedQuery($sql, $data = [])
     {
+        // データ保持
+        static::$sql = $sql;
+        static::$data = $data;
+
         //
-//var_dump($sql);
         $pre = $this->prepare($sql);
-//var_dump($pre);
-//var_dump($this->errorinfo());
+        if (false === $pre) {
+            static::$error = $this->errorinfo()[2];
+            return false;
+        }
 
         // XXX 組みなおしたほうがよさそう
-        foreach($data as $k => $v) {
-            if ( (is_int($v))||(is_float($v)) ) {
+        foreach ($data as $k => $v) {
+            if ((is_int($v))||(is_float($v))) {
                 $data_type = \PDO::PARAM_INT;
-            } else if (null === $v) {
+            } elseif (null === $v) {
                 $data_type = \PDO::PARAM_NULL;
-            } else if (is_bool($v)) {
+            } elseif (is_bool($v)) {
                 $data_type = \PDO::PARAM_BOOL;
             } else {
                 $data_type = \PDO::PARAM_STR;
@@ -124,21 +128,45 @@ class PDO extends \PDO
         }
         //
         $r = $pre->execute();
-//echo "-------------------------\n";
-//var_dump($sql);
-//var_dump($data);
-//var_dump($r);
-//var_dump($pre->errorinfo());
-//echo "-------------------------\n";
         if (true === $r) {
-//var_dump($pre);
             return $pre;
         }
         // else
+        static::$error = $pre->errorinfo()[2];
         return $r;
     }
+
+    /**
+     * 直前に preparedQuery で発行したSQL文の取得
+     */
+    public static function getSql()
+    {
+        return static::$sql;
+    }
+
+    /**
+     * 直前に preparedQuery で発行した「SQL文に充てたdata」の取得
+     */
+    public static function getData()
+    {
+        return static::$data;
+    }
+
+    /**
+     * preparedQuery でエラーが出たときの errorinfo()[2]
+     */
+    public static function getError()
+    {
+        return static::$error;
+    }
+
 
     //private:
     private $tran_flg = false; // トランザクション判定用フラグ
     protected $escape_token; // SQL識別子用のエスケープ文字
+
+    // 直前のデータ＆エラー情報保持用
+    protected static $sql = '';
+    protected static $data = [];
+    protected static $error = '';
 }
