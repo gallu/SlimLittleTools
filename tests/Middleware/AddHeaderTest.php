@@ -63,7 +63,7 @@ class AddHeaderTest extends \PHPUnit\Framework\TestCase
         $app->add(new AddHeader($app->getContainer()));
 
         // Register routes
-        $app->get('/',  function (Request $request, Response $response, array $args) {
+        $app->get('/', function (Request $request, Response $response, array $args) {
             //echo 'test';
         });
 
@@ -78,6 +78,5 @@ class AddHeaderTest extends \PHPUnit\Framework\TestCase
         //
         $this->assertSame(isset($headers['X-hoge']), true);
         $this->assertSame($headers['X-hoge'][0], 'foo');
-
     }
 }

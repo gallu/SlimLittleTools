@@ -71,7 +71,7 @@ class CsrfGuardTest extends \PHPUnit\Framework\TestCase
         ));
 
         // Register routes
-        $app->post('/foo',  function (Request $request, Response $response, array $args) {
+        $app->post('/foo', function (Request $request, Response $response, array $args) {
             //echo 'test';
         })->setName('foo');
 

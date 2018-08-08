@@ -177,8 +177,5 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
         $res->addError(['test' => ['hoge'], 'test2' => ['foo']]);
         $error = $res->getError();
         $this->assertSame($error, ['test' => ['required', 'hoge'], 'test2' => ['foo']]);
-
     }
-
 }
-

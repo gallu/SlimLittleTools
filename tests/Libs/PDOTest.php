@@ -118,6 +118,4 @@ INSERT INTO prepared_query_test(prepared_query_test_id, val, val2) VALUES(4, '4_
         $dbh = $this->getDbHandle();
         $dbh->escapeIdentifier('abc-de');
     }
-
 }
-

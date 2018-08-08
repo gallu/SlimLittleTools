@@ -38,6 +38,4 @@ class StaticBaseTest extends \PHPUnit\Framework\TestCase
     {
         $obj = unserialize('O:26:"SlimLittleTools\StaticBase":0:{}');
     }
-
 }
-

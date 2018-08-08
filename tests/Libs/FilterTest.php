@@ -75,5 +75,4 @@ class FilterTest extends \PHPUnit\Framework\TestCase
     {
         $data = Filter::exec(['test' => '1'], ['test' => 'int|string|hoge']);
     }
-
 }

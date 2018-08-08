@@ -64,7 +64,7 @@ class CookieTest extends \PHPUnit\Framework\TestCase
         $app->add(new Cookie($app->getContainer()));
 
         // Register routes
-        $app->get('/',  function (Request $request, Response $response, array $args) {
+        $app->get('/', function (Request $request, Response $response, array $args) {
             $this->get('cookie')->set('test', '123');
             $this->get('cookie')->set('test2', '987');
         });
@@ -77,8 +77,5 @@ class CookieTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(isset($headers['Set-Cookie']), true);
         $this->assertSame($headers['Set-Cookie'][0], 'test=123; HttpOnly');
         $this->assertSame($headers['Set-Cookie'][1], 'test2=987; HttpOnly');
-
-
-
     }
 }

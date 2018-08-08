@@ -125,7 +125,7 @@ class Validator
      */
     public function addError($add)
     {
-        foreach($add as $k => $v) {
+        foreach ($add as $k => $v) {
             //
             if (false === isset($this->error[$k])) {
                 $this->error[$k] = [];

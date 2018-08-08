@@ -11,7 +11,6 @@ use SlimLittleTools\Libs\Filter;
 use SlimLittleTools\Libs\Validator;
 use SlimLittleTools\Model\ModelCollection;
 
-
 class ModelBase
 {
     /*
@@ -86,7 +85,8 @@ class ModelBase
 
      */
     //
-    static public function insertValidate($data) {
+    public static function insertValidate($data)
+    {
         // ルールを把握
         $rules = static::getProperty('validate_insert', []) + static::getProperty('validate', []);
 
@@ -95,7 +95,8 @@ class ModelBase
 
         return $res;
     }
-    static public function insertFilter($data) {
+    public static function insertFilter($data)
+    {
         // ルールを把握
         $rules = static::getProperty('filter_insert', []) + static::getProperty('filter', []);
 
@@ -106,7 +107,8 @@ class ModelBase
         return $data;
     }
     // 仕様でちょっと思案中………
-    static public function selectFilter($data) {
+    public static function selectFilter($data)
+    {
         // ルールを把握
         $rules = static::getProperty('filter_update', []) + static::getProperty('filter_insert', []) + static::getProperty('filter', []);
 
@@ -118,7 +120,8 @@ class ModelBase
     }
 
     //
-    static public function updateValidate($data) {
+    public static function updateValidate($data)
+    {
         // ルールを把握
         $rules = static::getProperty('validate_update', []) + static::getProperty('validate', []);
 
@@ -127,7 +130,8 @@ class ModelBase
 
         return $res;
     }
-    static public function updateFilter($data) {
+    public static function updateFilter($data)
+    {
         // ルールを把握
         $rules = static::getProperty('filter_update', []) + static::getProperty('filter', []);
 
@@ -149,7 +153,7 @@ class ModelBase
             $date_time = date("Y-m-d H:i:s");
             if ((is_string($created_at))&&('' !== $created_at)) {
                 $data[$created_at] = $date_time;
-            } else if ( (is_bool($created_at))&&(true === $created_at) ){
+            } elseif ((is_bool($created_at))&&(true === $created_at)) {
                 $data['created_at'] = $date_time;
             }
         }
@@ -166,7 +170,7 @@ class ModelBase
             $date_time = date("Y-m-d H:i:s");
             if ((is_string($updated_at))&&('' !== $updated_at)) {
                 $data[$updated_at] = $date_time;
-            } else if ( (is_bool($updated_at))&&(true === $updated_at) ){
+            } elseif ((is_bool($updated_at))&&(true === $updated_at)) {
                 $data['updated_at'] = $date_time;
             }
         }
@@ -226,7 +230,7 @@ class ModelBase
         $pk_count = count($pk);
         $count = 0;
         // 「$dataの中に含まれているpkの数」をカウント
-        foreach($pk as $pk_mono) {
+        foreach ($pk as $pk_mono) {
             if (isset($data[$pk_mono])) {
                 $count ++;
             }
@@ -234,7 +238,7 @@ class ModelBase
         // 判定
         if ($pk_count === $count) {
             return 1;
-        } else if (0 === $count) {
+        } elseif (0 === $count) {
             return -1;
         }
         // else
@@ -273,12 +277,13 @@ class ModelBase
      * @param $forced_flg boolean ここが明示的にtrueなら「auto_incrementがtrueであっても、禁止項目チェックをしない」
      * @return ModelBase 成功したらModelBaseの継承インスタンス、失敗したらnull
      */
-    public static function insert($data, $forced_flg = false) {
+    public static function insert($data, $forced_flg = false)
+    {
         // 禁止項目チェック
-        if ( (true === static::getProperty('auto_increment'))&&(false === $forced_flg) ) {
+        if ((true === static::getProperty('auto_increment'))&&(false === $forced_flg)) {
             // 「AUTO_INCREMENTがtrueで、keyが単一で、$dataにそのkeyが入っている」が全部満たされたらNG
             // XXX 複合主キーでAUTO_INCREMENT、の時は一端ノータッチ: そのうち「カラム名が指定できる」とかにしようかなぁ？
-            if ( (is_string(static::getProperty('pk')))&&(isset($data[static::getProperty('pk')])) ) {
+            if ((is_string(static::getProperty('pk')))&&(isset($data[static::getProperty('pk')]))) {
                 throw new ModelGuardException();
             }
         }
@@ -296,7 +301,7 @@ class ModelBase
             throw (new ModelValidateException())->setErrorObj($res->getError());
         }
         // 削除カラムがあったら消しておく
-        foreach($res->getCheckedColmun() as $del_column) {
+        foreach ($res->getCheckedColmun() as $del_column) {
             unset($data[$del_column]);
         }
 
@@ -316,11 +321,11 @@ class ModelBase
         }
         // else
         $self = new static();
-        foreach($data as $k=> $v) {
+        foreach ($data as $k=> $v) {
             $self->set($k, $v);
         }
         // AUTO_INCREMENT なら、インスタンスに値を取得しておく
-        if ( (true === static::getProperty('auto_increment')) && (is_string(static::getProperty('pk'))) ) {
+        if ((true === static::getProperty('auto_increment')) && (is_string(static::getProperty('pk')))) {
             $self->set(static::getProperty('pk'), $dbh->lastInsertId());
         }
 
@@ -333,7 +338,8 @@ class ModelBase
      *
      * @return obj ModelBaseを継承した、Modelクラス
      */
-    public static function find($key) {
+    public static function find($key)
+    {
         // 「pkが一つ」の時は$keyがstringだと思われるので、$dataを適切に設定する
         if (is_string($key) || is_int($key)) {
             $pk = static::getProperty('pk');
@@ -353,7 +359,8 @@ class ModelBase
      * @param $p2 string $p1の値がstringの場合、$p2がその値となる。値がhashの場合は使われない
      * @return obj ModelBaseを継承した、Modelクラスのインスタンス。見つからない場合はnull
      */
-    public static function findBy($p1, $p2 = null) {
+    public static function findBy($p1, $p2 = null)
+    {
         $r = static::findByAll($p1, $p2);
         return (0 === count($r))? null : $r[0];
     }
@@ -364,7 +371,8 @@ class ModelBase
      * @param $p2 string $p1の値がstringの場合、$p2がその値となる。値がhashの場合は使われない
      * @return obj ModelCollectionインスタンス(中にはModelBaseを継承した、Modelクラスのインスタンス)。見つからない場合は空のModelCollectionインスタンス
      */
-    public static function findByAll($p1 = null, $p2 = null) {
+    public static function findByAll($p1 = null, $p2 = null)
+    {
         // 前処理
         if ([] === $p1) {
             $p1 = null;
@@ -373,9 +381,9 @@ class ModelBase
         //
         if (is_string($p1)) {
             $where = [$p1 => $p2];
-        } else if (is_array($p1)){
+        } elseif (is_array($p1)) {
             $where = $p1;
-        } else if (null === $p1){
+        } elseif (null === $p1) {
             $where = null;
         } else {
             throw new ModelGuardException('findByメソッドの第一引数がstringでもhashでもないです.');
@@ -385,7 +393,7 @@ class ModelBase
         if (null !== $where) {
             list($cols, $vals, $p_data) = static::makeSqlParts($where);
             $where = [];
-            for($i = 0; $i < count($cols); ++$i) {
+            for ($i = 0; $i < count($cols); ++$i) {
                 $where[] = "{$cols[$i]} = {$vals[$i]}";
             }
         } else {
@@ -419,10 +427,10 @@ class ModelBase
 
         // データがあったぽいのでインスタンス作ってreturn
         $ret = new ModelCollection();
-        foreach($data as $datum) {
+        foreach ($data as $datum) {
             $obj = new static();
             $datum = static::selectFilter($datum); // データを一旦フィルタリング
-            foreach($datum as $k => $v) {
+            foreach ($datum as $k => $v) {
                 $obj->set($k, $v);
             }
             $ret[] = $obj;
@@ -442,9 +450,9 @@ class ModelBase
         if (is_string($pk)) {
             $pk = [$pk];
         }
-        foreach($pk as $k) {
+        foreach ($pk as $k) {
             // 値の比較は型緩めに行う：後で変えるかも
-            if ( (isset($data[$k]))&&($data[$k] != $this->get($k)) ) {
+            if ((isset($data[$k]))&&($data[$k] != $this->get($k))) {
                 throw new ModelGuardException('PKをupdateで変更することはできません');
             }
             // else
@@ -453,10 +461,10 @@ class ModelBase
 
         // 禁止項目チェック
         $guard = static::getProperty('guard', []);
-        foreach($guard as $k) {
+        foreach ($guard as $k) {
             //
-            if ( (isset($data[$k]))&&($data[$k] !== $this->get($k)) ) {
-//var_dump($data[$k], $this->get($k) );
+            if ((isset($data[$k]))&&($data[$k] !== $this->get($k))) {
+                //var_dump($data[$k], $this->get($k) );
                 throw new ModelGuardException("guardによってガードされた値は変更できません({$k})");
             }
         }
@@ -473,18 +481,18 @@ class ModelBase
             throw (new ModelValidateException())->setErrorObj($res->getError());
         }
         // 削除カラムがあったら消しておく
-        foreach($res->getCheckedColmun() as $del_column) {
+        foreach ($res->getCheckedColmun() as $del_column) {
             unset($data[$del_column]);
         }
         // dataからはpkを消しておく
-        foreach($pk as $k) {
+        foreach ($pk as $k) {
             unset($data[$k]);
         }
 
         // update用パーツ
         list($cols, $vals, $p_data) = static::makeSqlParts($data);
         $sets = [];
-        for($i = 0; $i < count($cols); ++$i) {
+        for ($i = 0; $i < count($cols); ++$i) {
             $sets[] = "{$cols[$i]} = {$vals[$i]}";
         }
         // where情報を取得
@@ -502,7 +510,7 @@ class ModelBase
             return false;
         }
         // else
-        foreach($data as $k => $v) {
+        foreach ($data as $k => $v) {
             $this->set($k, $v);
         }
         return true;
@@ -535,7 +543,7 @@ class ModelBase
         // pkの情報を取得
         $pk = static::getProperty('pk');
         if (is_string($pk)) {
-// XXX
+            // XXX
             $pk_e = $pk; // エスケープとチェック
             $pk_placeholder = static::makePlaceholder($pk);
             $where = "{$pk_e} = {$pk_placeholder}";
@@ -545,8 +553,8 @@ class ModelBase
             // XXX 配列前提(nullとかは一旦未想定)
             $data = [];
             $where = [];
-            foreach($pk as $k) {
-// XXX
+            foreach ($pk as $k) {
+                // XXX
                 $k_e = $k; // エスケープとチェック
                 $k_placeholder = static::makePlaceholder($k);
                 $where[] = "{$k_e} = {$k_placeholder}";
@@ -581,7 +589,7 @@ class ModelBase
         $vals = [];
         $p_data = [];
         $where = [];
-        foreach($data as $k => $v) {
+        foreach ($data as $k => $v) {
             // カラム名の積み上げ
             $cols[] = $dbh->escapeIdentifier($k); // エスケープ
             // プレースホルダーと実データの積み上げ

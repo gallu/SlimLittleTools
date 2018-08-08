@@ -101,6 +101,4 @@ class DBTest extends \PHPUnit\Framework\TestCase
     {
         $obj = DB::getHandle('real');
     }
-
 }
-

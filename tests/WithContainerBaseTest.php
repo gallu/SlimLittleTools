@@ -27,9 +27,7 @@ class WithContainerBaseTest extends \PHPUnit\Framework\TestCase
     //
     public function testCreateInstance()
     {
-        $obj = new WithContainerBase( new Collection() );
+        $obj = new WithContainerBase(new Collection());
         $this->assertSame(is_object($obj), true);
     }
-
 }
-

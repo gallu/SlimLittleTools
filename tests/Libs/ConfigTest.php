@@ -55,6 +55,4 @@ class ConfigTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(Config::has('displayErrorDetails'), true);
         $this->assertSame(Config::has('test_empty'), false);
     }
-
 }
-

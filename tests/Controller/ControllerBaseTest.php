@@ -2,7 +2,6 @@
 
 namespace SlimLittleTools\Tests\Controller;
 
-
 use SlimLittleTools\Controller\ControllerBase;
 use Slim\Collection;
 
@@ -30,9 +29,7 @@ class ControllerBaseTest extends \PHPUnit\Framework\TestCase
     //
     public function testCreateInstance()
     {
-        $obj = new ControllerBase( new Collection() );
+        $obj = new ControllerBase(new Collection());
         $this->assertSame(is_object($obj), true);
     }
-
 }
-

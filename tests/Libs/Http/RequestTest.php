@@ -91,6 +91,4 @@ class RequestTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(isset($data['b']), false);
         $this->assertSame(isset($data['d']), false);
     }
-
 }
-

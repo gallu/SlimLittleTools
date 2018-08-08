@@ -27,9 +27,7 @@ class WithStaticContainerBaseTest extends \PHPUnit\Framework\TestCase
     //
     public function testSetContainer()
     {
-        $r = WithStaticContainerBase::setContainer( new Collection() );
+        $r = WithStaticContainerBase::setContainer(new Collection());
         $this->assertSame($r, null);
     }
-
 }
-

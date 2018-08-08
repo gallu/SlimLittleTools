@@ -122,7 +122,6 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         $app = new \Slim\App($settings);
         //
         DB::setContainer($app->getContainer());
-
     }
     // テストメソッドごとの開始前メソッド
     protected function setUp()
@@ -336,7 +335,4 @@ XXXXXX
         $this->assertSame('', '');
     }
      */
-
-
 }
-

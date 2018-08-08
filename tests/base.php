@@ -27,6 +27,4 @@ class HogeTest extends \PHPUnit\Framework\TestCase
     {
         $this->assertSame('', '');
     }
-
 }
-

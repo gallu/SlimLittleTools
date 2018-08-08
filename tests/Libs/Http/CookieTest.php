@@ -2,7 +2,6 @@
 
 namespace SlimLittleTools\Tests\Libs\Http;
 
-
 use SlimLittleTools\Libs\Http\Cookies;
 
 class CookieTest extends \PHPUnit\Framework\TestCase
@@ -48,6 +47,4 @@ class CookieTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(in_array('bba=200; secure; HostOnly', $headers), true);
         $this->assertSame(in_array('ddd=; expires=Thu, 01-Jan-1970 00:00:01 UTC; HttpOnly', $headers), true);
     }
-
 }
-

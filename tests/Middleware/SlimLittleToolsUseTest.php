@@ -59,7 +59,7 @@ class SlimLittleToolsUseTest extends \PHPUnit\Framework\TestCase
         $app->add(new SlimLittleToolsUse($app->getContainer()));
 
         // Register routes
-        $app->get('/',  function (Request $request, Response $response, array $args) {
+        $app->get('/', function (Request $request, Response $response, array $args) {
         });
 
         // Process the application
