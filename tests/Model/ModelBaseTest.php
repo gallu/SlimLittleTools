@@ -145,6 +145,7 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         // 先にお掃除
         $dbh = DB::getHandle();
         $dbh->query('delete from mode_1;');
+        $dbh->query('delete from mode_2;');
 
         // checkPkの確認
         // 単キー 2種
@@ -177,8 +178,6 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         // find(ある)
         $test_model = TestModel::find(1);
         $this->assertSame(get_class($test_model), TestModel::class);
-        // トランのチェック
-        $this->assertNotContains(TestModel::getJustBeforeQuery(), ' FOR UPDATE');
 
         // update + filter
         $this->assertSame($test_model->val, 'Val0123456789'); //「修正項目が変わっている」前を確認
@@ -191,13 +190,26 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(get_class($obj), TestModel::class);
         $this->assertSame($obj->mode_1_id, 1);
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         // 複合主キー : created_at / updated_at なし
         // insert
+        $r = TestModelMultiKey::insert([
+            'mode_2_id' => 1,
+            'mode_2_key' => 'key',
+            'val' => 'val',
+            ]);
+        $this->assertNotSame($r, null);
+        $this->assertSame(get_class($r), TestModelMultiKey::class);
+        $this->assertSame($r->val, 'val');
+
         // find
-        $this->assertSame('', '');
+        $objMulti = TestModelMultiKey::find(['mode_2_id' => 1,'mode_2_key' => 'key']);
+        $this->assertSame(get_class($objMulti), TestModelMultiKey::class);
         // update
+        $r = $objMulti->update(['val' => 'valxxx']);
+        $this->assertSame($r, true);
         // findBy
+        $objMulti2 = TestModelMultiKey::findBy(['val' => 'valxxx']);
+        $this->assertSame(get_class($objMulti2), TestModelMultiKey::class);
 
         // auto_incrementの確認
         // insert
@@ -213,78 +225,91 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(count($data->toArray()), 0);
 
         // トランザクションの確認
-        $this->assertSame('', ''); // isTran()
+        $test_model = TestModel::find(1);
+        $this->assertNotContains(' FOR UPDATE', strtoupper(TestModel::getJustBeforeQuery()));
+        $this->assertSame($dbh->isTran(), false); // isTran()
         // begin
-        $this->assertSame('', ''); // isTran()
+        $dbh->beginTransaction();
+        $this->assertSame($dbh->isTran(), true); // isTran()
+        {
             // find
-            $this->assertSame('', ''); // SQL文の確認
-            $this->assertSame('', '');
-            // update
+            $test_model = TestModel::find(1);
+            $this->assertContains(' FOR UPDATE', strtoupper(TestModel::getJustBeforeQuery()));
+        }
         // commit
-        $this->assertSame('', ''); // isTran()
+        $dbh->commit();
+        $this->assertSame($dbh->isTran(), false); // isTran()
 
-        // begin
-        $this->assertSame('', ''); // isTran()
-            // find
-            // update
-        // rollback
-        $this->assertSame('', ''); // isTran()
+        // 「空のfindByAll」
+        $r = TestModel::findByAll();
+        $this->assertNotSame($r, null);
 
         // 複合主キー delete
-        $this->assertSame('', ''); // findで確認
+        $r = $objMulti->delete();
+        $this->assertNotSame($r, false);
+        $obj = TestModelMultiKey::find(['mode_2_id' => 1,'mode_2_key' => 'key']);
+        $this->assertSame($obj, null);
 
         // 単純key delete
         $r = $test_model->delete();
         $this->assertNotSame($r, false);
+        $obj = TestModel::find(1);
+        $this->assertSame($obj, null);
 
         // auto_increment delete
-        $this->assertSame('', ''); // findで確認
+        $obj3_id = $obj3->mode_3_id;
+        $r = $obj3->delete();
+        $this->assertNotSame($r, false);
+        $obj = TestModelAutoIncrement::find($obj3_id);
+        $this->assertSame($obj, null);
     }
 
-// 違うDBハンドルを使うクラスの確認
+    // 違うDBハンドルを使うクラスの確認
+    // XXX
 
     /**
      * validateの例外
      *
      * @expectedException \SlimLittleTools\Exception\ModelValidateException
+     */
     public function testModelValidateException()
     {
-        $model = new TestModel();
-        TestModel::insert([]);
+        TestModel::insert(['val' => 'abc']);
     }
-     */
 
     /**
      * updateでガード句の例外
      *
+     * @depends testAll
      * @expectedException \SlimLittleTools\Exception\ModelGuardException
+     */
     public function testModelGuardException()
     {
-// XXX
-        $this->assertSame('', '');
+        $r = TestModel::insert(['mode_1_id' => '10', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        $r->update(['val_guard' => 'XXXXXXXXXXXXXXXX']);
     }
-     */
 
     /**
      * insertでauto_incrementの例外
      *
+     * @depends testAll
      * @expectedException \SlimLittleTools\Exception\ModelGuardException
+     */
     public function testModelGuardException2()
     {
-// XXX
-        $this->assertSame('', '');
+        $obj3 = TestModelAutoIncrement::insert(['mode_3_id' => 100, 'val' => 'test']);
     }
-     */
 
     /**
      * 単純なSQLのエラー例外: 存在しないカラム
      *
-     * @expectedException \SlimLittleTools\Exception\DbException
+     * expectedException \SlimLittleTools\Exception\DbException
+     * @expectedException \Error
     public function testDbException()
     {
-// XXX
-        $this->assertSame('', '');
+        $r = TestModel::insert(['mode_1_id' => '10', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', 'dummy' => '999']);
     }
+XXXXXX
      */
 
     /**

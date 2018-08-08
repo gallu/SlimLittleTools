@@ -364,28 +364,38 @@ class ModelBase
      * @param $p2 string $p1の値がstringの場合、$p2がその値となる。値がhashの場合は使われない
      * @return obj ModelCollectionインスタンス(中にはModelBaseを継承した、Modelクラスのインスタンス)。見つからない場合は空のModelCollectionインスタンス
      */
-    public static function findByAll($p1, $p2 = null) {
+    public static function findByAll($p1 = null, $p2 = null) {
         //
         if (is_string($p1)) {
             $where = [$p1 => $p2];
         } else if (is_array($p1)){
             $where = $p1;
+        } else if (null === $p1){
+            $where = null;
         } else {
             throw new ModelGuardException('findByメソッドの第一引数がstringでもhashでもないです.');
         }
 
         // select用パーツ
-        list($cols, $vals, $p_data) = static::makeSqlParts($where);
-        $where = [];
-        for($i = 0; $i < count($cols); ++$i) {
-            $where[] = "{$cols[$i]} = {$vals[$i]}";
+        if (null !== $where) {
+            list($cols, $vals, $p_data) = static::makeSqlParts($where);
+            $where = [];
+            for($i = 0; $i < count($cols); ++$i) {
+                $where[] = "{$cols[$i]} = {$vals[$i]}";
+            }
+        } else {
+            // 下で使うので宣言だけしておく
+            $p_data = [];
         }
 
         // DBハンドル取得
         $dbh = static::getDbHandle();
 
         //
-        $sql = 'SELECT * FROM ' . $dbh->escapeIdentifier(static::getProperty('table')) . ' WHERE ' . implode(' AND ', $where);
+        $sql = 'SELECT * FROM ' . $dbh->escapeIdentifier(static::getProperty('table')) ;
+        if (null !== $where) {
+            $sql .= ' WHERE ' . implode(' AND ', $where);
+        }
         if (true === $dbh->isTran()) {
             $sql .= ' FOR UPDATE';
         }
