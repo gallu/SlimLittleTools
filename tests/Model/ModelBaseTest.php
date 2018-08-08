@@ -112,7 +112,8 @@ class ModelTest extends \PHPUnit\Framework\TestCase
                     'host' => 'localhost',
                     'database' => 'slim_tools',
                     'user' => 'slim_tools',
-                    'pass' => 'XXXXXX',
+                    //'pass' => 'XXXXXX',
+                    'pass' => 'slim_tools',
                     'charset' => 'utf8mb4',
                     'options' => [\PDO::ATTR_EMULATE_PREPARES => false],
                 ],
@@ -127,7 +128,7 @@ class ModelTest extends \PHPUnit\Framework\TestCase
     protected function setUp()
     {
         // リアルなDB接続が必要なので、一旦スキップ
-        $this->markTestSkipped();
+        //$this->markTestSkipped();
     }
     // -----
     // テストメソッドごとの終了メソッド
@@ -242,6 +243,8 @@ class ModelTest extends \PHPUnit\Framework\TestCase
 
         // 「空のfindByAll」
         $r = TestModel::findByAll();
+        $this->assertNotSame($r, null);
+        $r = TestModel::findByAll([]);
         $this->assertNotSame($r, null);
 
         // 複合主キー delete

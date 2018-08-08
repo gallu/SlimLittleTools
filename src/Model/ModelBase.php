@@ -365,6 +365,11 @@ class ModelBase
      * @return obj ModelCollectionインスタンス(中にはModelBaseを継承した、Modelクラスのインスタンス)。見つからない場合は空のModelCollectionインスタンス
      */
     public static function findByAll($p1 = null, $p2 = null) {
+        // 前処理
+        if ([] === $p1) {
+            $p1 = null;
+        }
+
         //
         if (is_string($p1)) {
             $where = [$p1 => $p2];
