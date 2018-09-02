@@ -2,7 +2,7 @@
 
 namespace SlimLittleTools\Libs;
 
-class Sscurity
+class Security
 {
     /**
      * 非最短形式のチェック

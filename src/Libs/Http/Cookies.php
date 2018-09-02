@@ -2,7 +2,7 @@
 
 namespace SlimLittleTools\Libs\Http;
 
-use SlimLittleTools\Libs\Sscurity;
+use SlimLittleTools\Libs\Security;
 
 class Cookies extends \Slim\Http\Cookies
 {
@@ -11,7 +11,7 @@ class Cookies extends \Slim\Http\Cookies
      */
     public function get($key, $default = null)
     {
-        return Sscurity::checkEncoding(parent::get($key, $default));
+        return Security::checkEncoding(parent::get($key, $default));
     }
 
     /**

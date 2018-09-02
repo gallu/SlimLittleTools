@@ -2,7 +2,7 @@
 
 namespace SlimLittleTools\Libs\Http;
 
-use SlimLittleTools\Libs\Sscurity;
+use SlimLittleTools\Libs\Security;
 
 class Request extends \Slim\Http\Request
 {
@@ -11,19 +11,19 @@ class Request extends \Slim\Http\Request
      */
     public function getParam($key, $default = null)
     {
-        return Sscurity::checkEncoding(parent::getParam($key, $default));
+        return Security::checkEncoding(parent::getParam($key, $default));
     }
     public function getParsedBodyParam($key, $default = null)
     {
-        return Sscurity::checkEncoding(parent::getParsedBodyParam($key, $default));
+        return Security::checkEncoding(parent::getParsedBodyParam($key, $default));
     }
     public function getQueryParam($key, $default = null)
     {
-        return Sscurity::checkEncoding(parent::getQueryParam($key, $default));
+        return Security::checkEncoding(parent::getQueryParam($key, $default));
     }
     public function getCookieParam($key, $default = null)
     {
-        return Sscurity::checkEncoding(parent::getCookieParam($key, $default));
+        return Security::checkEncoding(parent::getCookieParam($key, $default));
     }
 
     /**
