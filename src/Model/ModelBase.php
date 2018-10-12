@@ -71,6 +71,27 @@ class ModelBase
         //'カラム名' => 'ルール',
     ];
 
+    /*
+     * カラムの一覧
+     *
+     * XXX 基本的に requestで入ってくるform情報とぶつけてデータを出す用に想定：なのでkeyはformのnameアトリビュート値(略してform名)
+     */
+    // INSERTとUPDATEで共通のカラム
+    static protected $columns_list = [
+        //'form名' => 'カラム名', // カラム名が空ならform名をそのままカラム名にする
+        //'form名' => 'カラム名', // カラム名が空ならform名をそのままカラム名にする
+    ];
+    // INSERT時固有のカラム
+    static protected $columns_list_only_insert = [
+        //'form名' => 'カラム名', // カラム名が空ならform名をそのままカラム名にする
+        //'form名' => 'カラム名', // カラム名が空ならform名をそのままカラム名にする
+    ];
+    // UPDATE時固有のカラム
+    static protected $columns_list_only_update = [
+        //'form名' => 'カラム名', // カラム名が空ならform名をそのままカラム名にする
+        //'form名' => 'カラム名', // カラム名が空ならform名をそのままカラム名にする
+    ];
+
     /**
      * 継承先での上書きを想定するメソッド群
      *
@@ -645,11 +666,92 @@ class ModelBase
     }
 
     /**
-     *
+     * 「直前に発行したクエリ」を取得(主にデバッグ用途)
      */
     public static function getJustBeforeQuery()
     {
         return static::$just_before_query;
+    }
+
+    /**
+     * insert用のカラム一覧
+     * 
+     * 配列は「[form名] = 'カラム名'」のフォーマット。form名==カラム名の時は、カラム名が空文字
+     */
+    public static function getInsertColumnsList()
+    {
+        return static::$columns_list + static::$columns_list_only_insert;
+    }
+    /**
+     * update用のカラム一覧
+     * 
+     * 配列は「[form名] = 'カラム名'」のフォーマット。form名==カラム名の時は、カラム名が空文字
+     */
+    public static function getUpdateColumnsList()
+    {
+        return static::$columns_list + static::$columns_list_only_update;
+    }
+
+    /**
+     * form requestからのinsert
+     * 
+     * @param \SlimLittleTools\Libs\Http\Request $request リクエストインスタンス
+     * @param array $list カラムの配列。デフォルト([])の場合は static::getInsertColumnsList() の値を使う
+     * @return any insertメソッドに準じる
+     */
+    public static function insertFromRequest(\SlimLittleTools\Libs\Http\Request $request, $list = [])
+    {
+        //
+        if (empty($list)) {
+            $list = static::getInsertColumnsList();
+        }
+        // データの取得
+        $data = static::_getDataFromRequest($request, $list);
+
+        // insert
+        return static::insert($data);
+    }
+
+    /**
+     * form requestからのupdate
+     * 
+     * @param \SlimLittleTools\Libs\Http\Request $request リクエストインスタンス
+     * @param array $list カラムの配列。デフォルト([])の場合は static::getUpdateColumnsList() の値を使う
+     * @return any updateメソッドに準じる
+     */
+    public function updateFromRequest(\SlimLittleTools\Libs\Http\Request $request, $list = [])
+    {
+        //
+        if (empty($list)) {
+            $list = $this::getUpdateColumnsList();
+        }
+        // データの取得
+        $data = $this::_getDataFromRequest($request, $list);
+
+        // insert
+        return $this->update($data);
+    }
+
+    /**
+     * 「formからデータ取得して配列を整形する」辺りを切り出した共通処理
+     */
+    static protected function _getDataFromRequest(\SlimLittleTools\Libs\Http\Request $request, $list)
+    {
+        // データの取得
+        $form_data = $request->getSpecifiedParams( array_keys($list) );
+
+        // データの整形
+        $data = [];
+        foreach($list as $k => $v) {
+            // 「listの値が空文字」の時用の対応
+            if ('' === $v) {
+                $v = $k;
+            }
+            $data[$v] = $form_data[$k];
+        }
+
+        //
+        return $data;
     }
 
 

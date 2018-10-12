@@ -5,6 +5,10 @@ namespace SlimLittleTools\Tests\Model;
 use SlimLittleTools\Model\ModelBase;
 use SlimLittleTools\Libs\DB;
 
+use SlimLittleTools\Libs\Http\Request;
+use Slim\Http\Environment;
+
+
 /*
 
 テスト用テーブル
@@ -70,6 +74,16 @@ class TestModel extends ModelBase
         'mode_1_id' => 'int',
         'val_guard' => 'trim|strtolower',
     ];
+    //
+    // INSERTとUPDATEで共通のカラム
+    static protected $columns_list = [
+        'val' => '', // カラム名が空ならform名をそのままカラム名にする
+    ];
+    // INSERT時固有のカラム
+    static protected $columns_list_only_insert = [
+        'mode_1_id' => '', // カラム名が空ならform名をそのままカラム名にする
+        'val_guard' => '', // カラム名が空ならform名をそのままカラム名にする
+    ];
 }
 // テスト用モデル
 class TestModelMultiKey extends ModelBase
@@ -96,6 +110,24 @@ class TestModelAnotherDB extends ModelBase
 {
     protected $db_suffix = 'hoge';
 }
+// getInsertColumnsListとgetUpdateColumnsList用テストモデル
+class TestColumnsList extends ModelBase
+{
+    // INSERTとUPDATEで共通のカラム
+    static protected $columns_list = [
+        'common_1' => '', // カラム名が空ならform名をそのままカラム名にする
+        'common_2' => '', // カラム名が空ならform名をそのままカラム名にする
+    ];
+    // INSERT時固有のカラム
+    static protected $columns_list_only_insert = [
+        'insert_1' => '', // カラム名が空ならform名をそのままカラム名にする
+    ];
+    // UPDATE時固有のカラム
+    static protected $columns_list_only_update = [
+        'update_1' => '', // カラム名が空ならform名をそのままカラム名にする
+    ];
+}
+
 
 // テスト本体
 class ModelTest extends \PHPUnit\Framework\TestCase
@@ -112,8 +144,7 @@ class ModelTest extends \PHPUnit\Framework\TestCase
                     'host' => 'localhost',
                     'database' => 'slim_tools',
                     'user' => 'slim_tools',
-                    //'pass' => 'XXXXXX',
-                    'pass' => 'slim_tools',
+                    'pass' => 'XXXXXX',
                     'charset' => 'utf8mb4',
                     'options' => [\PDO::ATTR_EMULATE_PREPARES => false],
                 ],
@@ -127,7 +158,7 @@ class ModelTest extends \PHPUnit\Framework\TestCase
     protected function setUp()
     {
         // リアルなDB接続が必要なので、一旦スキップ
-        //$this->markTestSkipped();
+        $this->markTestSkipped();
     }
     // -----
     // テストメソッドごとの終了メソッド
@@ -264,6 +295,88 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         $this->assertNotSame($r, false);
         $obj = TestModelAutoIncrement::find($obj3_id);
         $this->assertSame($obj, null);
+
+        // getInsertColumnsListとgetUpdateColumnsListのテスト
+        $insert_list = TestColumnsList::getInsertColumnsList();
+        $this->assertArrayHasKey('common_1', $insert_list);
+        $this->assertArrayHasKey('common_2', $insert_list);
+        $this->assertArrayHasKey('insert_1', $insert_list);
+        $this->assertArrayNotHasKey('update_1', $insert_list);
+        $update_list = TestColumnsList::getUpdateColumnsList();
+        $this->assertArrayHasKey('common_1', $update_list);
+        $this->assertArrayHasKey('common_2', $update_list);
+        $this->assertArrayHasKey('update_1', $update_list);
+        $this->assertArrayNotHasKey('insert_1', $update_list);
+
+        // 実際のinsert
+        // Create a mock environment for testing with
+        $environment = Environment::mock(
+            [
+                'REQUEST_METHOD' => 'GET',
+                'REQUEST_URI' => '/?mode_1_id=99&val=Val0123456789&val_guard=ValGuard0123456789',
+            ]
+        );
+        // Set up a request object based on the environment
+        $request = Request::createFromEnvironment($environment);
+        // その１
+        $obj = TestModel::insertFromRequest($request);
+        $this->assertNotSame($obj, null);
+        $this->assertSame(get_class($obj), TestModel::class);
+        $this->assertSame($obj->mode_1_id, 99);
+
+        // 実際のupdate
+        $environment = Environment::mock(
+            [
+                'REQUEST_METHOD' => 'GET',
+                'REQUEST_URI' => '/?val=valval1234',
+            ]
+        );
+        // Set up a request object based on the environment
+        $request = Request::createFromEnvironment($environment);
+        //
+        $r = $obj->updateFromRequest($request);
+        $this->assertNotSame($r, false);
+        $this->assertSame($test_model->val, 'valval1234'); //「修正項目が変わっている」事を確認
+
+        // 実際のinsert: formの名前が違うケース
+        // Create a mock environment for testing with
+        $environment = Environment::mock(
+            [
+                'REQUEST_METHOD' => 'GET',
+                'REQUEST_URI' => '/?id=999&form_val=Val0123456789&val_guard=ValGuard0123456789',
+            ]
+        );
+        // Set up a request object based on the environment
+        $request = Request::createFromEnvironment($environment);
+        // その１
+        $list = TestModel::getInsertColumnsList();
+        unset($list['mode_1_id']);
+        unset($list['val']);
+        $list['id'] = 'mode_1_id';
+        $list['form_val'] = 'val';
+        $obj = TestModel::insertFromRequest($request, $list);
+        $this->assertNotSame($obj, null);
+        $this->assertSame(get_class($obj), TestModel::class);
+        $this->assertSame($obj->mode_1_id, 999);
+
+
+        // 実際のupdate: formの名前が違うケース
+        $environment = Environment::mock(
+            [
+                'REQUEST_METHOD' => 'GET',
+                'REQUEST_URI' => '/?form_val=valval1234',
+            ]
+        );
+        // Set up a request object based on the environment
+        $request = Request::createFromEnvironment($environment);
+        //
+        $list = TestModel::getUpdateColumnsList();
+        unset($list['val']);
+        $list['form_val'] = 'val';
+        $r = $obj->updateFromRequest($request, $list);
+        $this->assertNotSame($r, false);
+        $this->assertSame($test_model->val, 'valval1234'); //「修正項目が変わっている」事を確認
+
     }
 
     // 違うDBハンドルを使うクラスの確認
