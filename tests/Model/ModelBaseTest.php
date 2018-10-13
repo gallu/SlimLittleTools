@@ -77,12 +77,12 @@ class TestModel extends ModelBase
     //
     // INSERTとUPDATEで共通のカラム
     static protected $columns_list = [
-        'val' => '', // カラム名が空ならform名をそのままカラム名にする
+        'val' => '', // form名が空ならカラム名をそのままform名にする
     ];
     // INSERT時固有のカラム
     static protected $columns_list_only_insert = [
-        'mode_1_id' => '', // カラム名が空ならform名をそのままカラム名にする
-        'val_guard' => '', // カラム名が空ならform名をそのままカラム名にする
+        'mode_1_id' => '', // form名が空ならカラム名をそのままform名にする
+        'val_guard' => '', // form名が空ならカラム名をそのままform名にする
     ];
 }
 // テスト用モデル
@@ -115,16 +115,16 @@ class TestColumnsList extends ModelBase
 {
     // INSERTとUPDATEで共通のカラム
     static protected $columns_list = [
-        'common_1' => '', // カラム名が空ならform名をそのままカラム名にする
-        'common_2' => '', // カラム名が空ならform名をそのままカラム名にする
+        'common_1' => '', // form名が空ならカラム名をそのままform名にする
+        'common_2' => '', // form名が空ならカラム名をそのままform名にする
     ];
     // INSERT時固有のカラム
     static protected $columns_list_only_insert = [
-        'insert_1' => '', // カラム名が空ならform名をそのままカラム名にする
+        'insert_1' => '', // form名が空ならカラム名をそのままform名にする
     ];
     // UPDATE時固有のカラム
     static protected $columns_list_only_update = [
-        'update_1' => '', // カラム名が空ならform名をそのままカラム名にする
+        'update_1' => '', // form名が空ならカラム名をそのままform名にする
     ];
 }
 
@@ -343,17 +343,15 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         $environment = Environment::mock(
             [
                 'REQUEST_METHOD' => 'GET',
-                'REQUEST_URI' => '/?id=999&form_val=Val0123456789&val_guard=ValGuard0123456789',
+                'REQUEST_URI' => '/?id=999&form_val=Val0123456789&val_guard=ValGuard0123456789&dummy=123456',
             ]
         );
         // Set up a request object based on the environment
         $request = Request::createFromEnvironment($environment);
         // その１
         $list = TestModel::getInsertColumnsList();
-        unset($list['mode_1_id']);
-        unset($list['val']);
-        $list['id'] = 'mode_1_id';
-        $list['form_val'] = 'val';
+        $list['mode_1_id'] = 'id';
+        $list['val'] = 'form_val';
         $obj = TestModel::insertFromRequest($request, $list);
         $this->assertNotSame($obj, null);
         $this->assertSame(get_class($obj), TestModel::class);
@@ -364,15 +362,14 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         $environment = Environment::mock(
             [
                 'REQUEST_METHOD' => 'GET',
-                'REQUEST_URI' => '/?form_val=valval1234',
+                'REQUEST_URI' => '/?form_val=valval1234&dummy=123456',
             ]
         );
         // Set up a request object based on the environment
         $request = Request::createFromEnvironment($environment);
         //
         $list = TestModel::getUpdateColumnsList();
-        unset($list['val']);
-        $list['form_val'] = 'val';
+        $list['val'] = 'form_val';
         $r = $obj->updateFromRequest($request, $list);
         $this->assertNotSame($r, false);
         $this->assertSame($test_model->val, 'valval1234'); //「修正項目が変わっている」事を確認

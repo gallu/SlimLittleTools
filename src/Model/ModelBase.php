@@ -78,18 +78,18 @@ class ModelBase
      */
     // INSERTとUPDATEで共通のカラム
     static protected $columns_list = [
-        //'form名' => 'カラム名', // カラム名が空ならform名をそのままカラム名にする
-        //'form名' => 'カラム名', // カラム名が空ならform名をそのままカラム名にする
+        //'カラム名' => 'form名', // form名が空ならカラム名をそのままform名にする
+        //'カラム名' => 'form名', // form名が空ならカラム名をそのままform名にする
     ];
     // INSERT時固有のカラム
     static protected $columns_list_only_insert = [
-        //'form名' => 'カラム名', // カラム名が空ならform名をそのままカラム名にする
-        //'form名' => 'カラム名', // カラム名が空ならform名をそのままカラム名にする
+        //'カラム名' => 'form名', // form名が空ならカラム名をそのままform名にする
+        //'カラム名' => 'form名', // form名が空ならカラム名をそのままform名にする
     ];
     // UPDATE時固有のカラム
     static protected $columns_list_only_update = [
-        //'form名' => 'カラム名', // カラム名が空ならform名をそのままカラム名にする
-        //'form名' => 'カラム名', // カラム名が空ならform名をそのままカラム名にする
+        //'カラム名' => 'form名', // form名が空ならカラム名をそのままform名にする
+        //'カラム名' => 'form名', // form名が空ならカラム名をそのままform名にする
     ];
 
     /**
@@ -737,17 +737,20 @@ class ModelBase
      */
     static protected function _getDataFromRequest(\SlimLittleTools\Libs\Http\Request $request, $list)
     {
+        // 先にlistを整える
+        foreach($list as $k => $v) {
+            if ('' === $v) {
+                $list[$k] = $k;
+            }
+        }
+
         // データの取得
-        $form_data = $request->getSpecifiedParams( array_keys($list) );
+        $form_data = $request->getSpecifiedParams( array_values($list) );
 
         // データの整形
         $data = [];
         foreach($list as $k => $v) {
-            // 「listの値が空文字」の時用の対応
-            if ('' === $v) {
-                $v = $k;
-            }
-            $data[$v] = $form_data[$k];
+            $data[$k] = $form_data[$v];
         }
 
         //
