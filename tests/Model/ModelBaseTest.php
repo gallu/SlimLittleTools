@@ -8,7 +8,6 @@ use SlimLittleTools\Libs\DB;
 use SlimLittleTools\Libs\Http\Request;
 use Slim\Http\Environment;
 
-
 /*
 
 テスト用テーブル
@@ -76,11 +75,11 @@ class TestModel extends ModelBase
     ];
     //
     // INSERTとUPDATEで共通のカラム
-    static protected $columns_list = [
+    protected static $columns_list = [
         'val' => '', // form名が空ならカラム名をそのままform名にする
     ];
     // INSERT時固有のカラム
-    static protected $columns_list_only_insert = [
+    protected static $columns_list_only_insert = [
         'mode_1_id' => '', // form名が空ならカラム名をそのままform名にする
         'val_guard' => '', // form名が空ならカラム名をそのままform名にする
     ];
@@ -114,16 +113,16 @@ class TestModelAnotherDB extends ModelBase
 class TestColumnsList extends ModelBase
 {
     // INSERTとUPDATEで共通のカラム
-    static protected $columns_list = [
+    protected static $columns_list = [
         'common_1' => '', // form名が空ならカラム名をそのままform名にする
         'common_2' => '', // form名が空ならカラム名をそのままform名にする
     ];
     // INSERT時固有のカラム
-    static protected $columns_list_only_insert = [
+    protected static $columns_list_only_insert = [
         'insert_1' => '', // form名が空ならカラム名をそのままform名にする
     ];
     // UPDATE時固有のカラム
-    static protected $columns_list_only_update = [
+    protected static $columns_list_only_update = [
         'update_1' => '', // form名が空ならカラム名をそのままform名にする
     ];
 }
@@ -373,7 +372,6 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         $r = $obj->updateFromRequest($request, $list);
         $this->assertNotSame($r, false);
         $this->assertSame($test_model->val, 'valval1234'); //「修正項目が変わっている」事を確認
-
     }
 
     // 違うDBハンドルを使うクラスの確認

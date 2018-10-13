@@ -77,17 +77,17 @@ class ModelBase
      * XXX 基本的に requestで入ってくるform情報とぶつけてデータを出す用に想定：なのでkeyはformのnameアトリビュート値(略してform名)
      */
     // INSERTとUPDATEで共通のカラム
-    static protected $columns_list = [
+    protected static $columns_list = [
         //'カラム名' => 'form名', // form名が空ならカラム名をそのままform名にする
         //'カラム名' => 'form名', // form名が空ならカラム名をそのままform名にする
     ];
     // INSERT時固有のカラム
-    static protected $columns_list_only_insert = [
+    protected static $columns_list_only_insert = [
         //'カラム名' => 'form名', // form名が空ならカラム名をそのままform名にする
         //'カラム名' => 'form名', // form名が空ならカラム名をそのままform名にする
     ];
     // UPDATE時固有のカラム
-    static protected $columns_list_only_update = [
+    protected static $columns_list_only_update = [
         //'カラム名' => 'form名', // form名が空ならカラム名をそのままform名にする
         //'カラム名' => 'form名', // form名が空ならカラム名をそのままform名にする
     ];
@@ -675,7 +675,7 @@ class ModelBase
 
     /**
      * insert用のカラム一覧
-     * 
+     *
      * 配列は「[form名] = 'カラム名'」のフォーマット。form名==カラム名の時は、カラム名が空文字
      */
     public static function getInsertColumnsList()
@@ -684,7 +684,7 @@ class ModelBase
     }
     /**
      * update用のカラム一覧
-     * 
+     *
      * 配列は「[form名] = 'カラム名'」のフォーマット。form名==カラム名の時は、カラム名が空文字
      */
     public static function getUpdateColumnsList()
@@ -694,7 +694,7 @@ class ModelBase
 
     /**
      * form requestからのinsert
-     * 
+     *
      * @param \SlimLittleTools\Libs\Http\Request $request リクエストインスタンス
      * @param array $list カラムの配列。デフォルト([])の場合は static::getInsertColumnsList() の値を使う
      * @return any insertメソッドに準じる
@@ -714,7 +714,7 @@ class ModelBase
 
     /**
      * form requestからのupdate
-     * 
+     *
      * @param \SlimLittleTools\Libs\Http\Request $request リクエストインスタンス
      * @param array $list カラムの配列。デフォルト([])の場合は static::getUpdateColumnsList() の値を使う
      * @return any updateメソッドに準じる
@@ -735,21 +735,21 @@ class ModelBase
     /**
      * 「formからデータ取得して配列を整形する」辺りを切り出した共通処理
      */
-    static protected function _getDataFromRequest(\SlimLittleTools\Libs\Http\Request $request, $list)
+    protected static function _getDataFromRequest(\SlimLittleTools\Libs\Http\Request $request, $list)
     {
         // 先にlistを整える
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             if ('' === $v) {
                 $list[$k] = $k;
             }
         }
 
         // データの取得
-        $form_data = $request->getSpecifiedParams( array_values($list) );
+        $form_data = $request->getSpecifiedParams(array_values($list));
 
         // データの整形
         $data = [];
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             $data[$k] = $form_data[$v];
         }
 
