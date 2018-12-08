@@ -93,4 +93,49 @@ class Filter
     {
         return (string)$datum;
     }
+
+    /**
+     * 郵便番号系の基底メソッド
+     *
+     */
+    protected static function zipBase($zip, $separator)
+    {
+        // ざっくり分解
+        $r = preg_match('/\A(\d{3})[- ]{0,1}(\d{4})\z/', $zip, $mat);
+        // 郵便番号じゃなければ空文字return
+        if (0 === $r) {
+            return '';
+        }
+        // else
+        // 整形してreturn
+        return "{$mat[1]}{$separator}{$mat[2]}";
+    }
+    /**
+     * 郵便番号をハイフン付きに整形
+     */
+    protected static function filterZip_hyphen($zip)
+    {
+        return static::zipBase($zip, '-');
+    }
+    /**
+     * 郵便番号をスペース付きに整形
+     */
+    protected static function filterZip_space($zip)
+    {
+        return static::zipBase($zip, ' ');
+    }
+    /**
+     * 郵便番号を数字7桁のみ、に整形
+     */
+    protected static function filterZip_shorten($zip)
+    {
+        return static::zipBase($zip, '');
+    }
+
+
+
+
+
+
+
 }

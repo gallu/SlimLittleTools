@@ -47,6 +47,18 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
             't_compare_with_check' => 'pass',
             't_int' => '12345',
             't_float' => '12.345',
+            't_zip_1' => '123-4567',
+            't_zip_2' => '123 4567',
+            't_zip_3' => '1234567',
+            't_tel_1' => '03-1234-5678',
+            't_tel_2' => '03 1234 5678',
+            't_tel_3' => '0312345678',
+            't_tel_4' => '090-1234-5678',
+            't_tel_5' => '090 1234 5678',
+            't_tel_6' => '09012345678',
+            't_tel_7' => '098-765-5678',
+            't_tel_8' => '0987-65-5678',
+            't_tel_9' => '0120-123-456',
         ];
         $rules = [
             't_required' => 'required',
@@ -66,6 +78,18 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
             't_compare_with_check' => 'required',
             't_int' => 'int',
             't_float' => 'float',
+            't_zip_1' => 'zip',
+            't_zip_2' => 'zip',
+            't_zip_3' => 'zip',
+            't_tel_1' => 'tel',
+            't_tel_2' => 'tel',
+            't_tel_3' => 'tel',
+            't_tel_4' => 'tel',
+            't_tel_5' => 'tel',
+            't_tel_6' => 'tel',
+            't_tel_7' => 'tel',
+            't_tel_8' => 'tel',
+            't_tel_9' => 'tel',
         ];
         //
         $res = Validator::validate($data, $rules);
@@ -131,6 +155,17 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
         //
         $res = Validator::validate(['t_float' => 'abc'], ['t_float' => 'float']);
         $this->assertSame($res->isValid(), false);
+        //
+        $res = Validator::validate(['t_zip' => 'abc'], ['t_zip' => 'zip']);
+        $this->assertSame($res->isValid(), false);
+        $res = Validator::validate(['t_zip' => '123456789'], ['t_zip' => 'zip']);
+        $this->assertSame($res->isValid(), false);
+        //
+        $res = Validator::validate(['t_tel' => 'abc'], ['t_tel' => 'tel']);
+        $this->assertSame($res->isValid(), false);
+        $res = Validator::validate(['t_tel' => '123456'], ['t_tel' => 'tel']);
+        $this->assertSame($res->isValid(), false);
+
     }
 
     public function testMultiError()

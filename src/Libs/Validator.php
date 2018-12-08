@@ -312,6 +312,37 @@ class Validator
         }
         return true;
     }
+    /**
+     * 郵便番号
+     *
+     * XXX 簡易なので、ガチガチに正確ではない
+     */
+    public static function validateExecZip($datum, $param)
+    {
+        // ざっくり分解
+        $r = preg_match('/\A(\d{3})[- ]{0,1}(\d{4})\z/', $datum);
+        // 郵便番号じゃなければfalse
+        if (0 === $r) {
+            return false;
+        }
+        return true;
+    }
+    /**
+     * 電話番号
+     *
+     * XXX 簡易なので、ガチガチに正確ではない
+     */
+    public static function validateExecTel($datum, $param)
+    {
+        // ざっくり分解
+        $r = preg_match('/\A0\d{1,4}[- ]{0,1}\d{1,4}[- ]{0,1}\d{3,4}\z/', $datum);
+        // 電話番号じゃなければfalse
+        if (0 === $r) {
+            return false;
+        }
+        return true;
+    }
+
 
 
     //private:

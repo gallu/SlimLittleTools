@@ -59,6 +59,48 @@ class FilterTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($data['t_abs'], 1);
         $this->assertSame($data['t_int'], 100);
         $this->assertSame($data['t_string'], '200');
+
+        // zip
+        $base_data = [
+            'zip_1_1' => '123-4567',
+            'zip_1_2' => '123-4567',
+            'zip_1_3' => '123-4567',
+            'zip_2_1' => '123 4567',
+            'zip_2_2' => '123 4567',
+            'zip_2_3' => '123 4567',
+            'zip_3_1' => '1234567',
+            'zip_3_2' => '1234567',
+            'zip_3_3' => '1234567',
+            'zip_error_1' => '123',
+            'zip_error_2' => '123456789',
+        ];
+        $rules = [
+            'zip_1_1' => 'zip_hyphen',
+            'zip_1_2' => 'zip_space',
+            'zip_1_3' => 'zip_shorten',
+            'zip_2_1' => 'zip_hyphen',
+            'zip_2_2' => 'zip_space',
+            'zip_2_3' => 'zip_shorten',
+            'zip_3_1' => 'zip_hyphen',
+            'zip_3_2' => 'zip_space',
+            'zip_3_3' => 'zip_shorten',
+            'zip_error_1' => 'zip_hyphen',
+            'zip_error_2' => 'zip_space',
+        ];
+        //
+        $data = Filter::exec($base_data, $rules);
+        foreach(['zip_1_1', 'zip_2_1', 'zip_3_1'] as $s) {
+            $this->assertSame($data[$s], '123-4567');
+        }
+        foreach(['zip_1_2', 'zip_2_2', 'zip_3_2'] as $s) {
+            $this->assertSame($data[$s], '123 4567');
+        }
+        foreach(['zip_1_3', 'zip_2_3', 'zip_3_3'] as $s) {
+            $this->assertSame($data[$s], '1234567');
+        }
+        $this->assertSame($data['zip_error_1'], '');
+        $this->assertSame($data['zip_error_2'], '');
+
     }
 
     //

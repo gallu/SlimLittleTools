@@ -63,6 +63,9 @@ PDOとあるが、実際には拡張されたPDOクラス
 - abs  絶対値
 - int  int型へのキャスト
 - string  string型へのキャスト
+- zip_hyphen  ハイフン付きの郵便番号にフォーマット(郵便番号としてinvalidなら空文字)
+- zip_space  スペース付きの郵便番号にフォーマット(郵便番号としてinvalidなら空文字)
+- zip_shorten  数字のみの郵便番号にフォーマット(郵便番号としてinvalidなら空文字)
 
 ### Validator.php
 
@@ -84,6 +87,8 @@ PDOとあるが、実際には拡張されたPDOクラス
 - compare_with  自身のカラム名＋'_check' を探して、値をチェック。等しくなければエラー。パスワードとかemailで使う想定
 - int  int型、もしくは「intとして認識可能な数字だけの文字列」であること
 - float  float型、もしくは「floatとして認識可能な数字だけの文字列」であること
+- zip  郵便番号形式( nnn-nnnn , nnn nnnn , nnnnnnn )であること
+- tel  電話番号形式( ハイフン、スペース、数字のみは一通り対応)であること
 
 ## ./Libs/Http:
 
