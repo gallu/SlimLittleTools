@@ -100,8 +100,8 @@ class FilterTest extends \PHPUnit\Framework\TestCase
         foreach(['zip_1_3', 'zip_2_3', 'zip_3_3'] as $s) {
             $this->assertSame($data[$s], '1234567');
         }
-        $this->assertSame($data['zip_error_1'], '');
-        $this->assertSame($data['zip_error_2'], '');
+        $this->assertSame($data['zip_error_1'], '123');
+        $this->assertSame($data['zip_error_2'], '123456789');
         $this->assertSame($data['zip_error_3'], '');
 
     }

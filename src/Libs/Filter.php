@@ -102,9 +102,9 @@ class Filter
     {
         // ざっくり分解
         $r = preg_match('/\A(\d{3})[- ]{0,1}(\d{4})\z/', $zip, $mat);
-        // 郵便番号じゃなければ空文字return
+        // 郵便番号じゃなければ入力値をそのままreturn
         if (0 === $r) {
-            return '';
+            return $zip;
         }
         // else
         // 整形してreturn
