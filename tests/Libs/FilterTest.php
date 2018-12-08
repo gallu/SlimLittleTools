@@ -73,6 +73,7 @@ class FilterTest extends \PHPUnit\Framework\TestCase
             'zip_3_3' => '1234567',
             'zip_error_1' => '123',
             'zip_error_2' => '123456789',
+            'zip_error_3' => '',
         ];
         $rules = [
             'zip_1_1' => 'zip_hyphen',
@@ -86,6 +87,7 @@ class FilterTest extends \PHPUnit\Framework\TestCase
             'zip_3_3' => 'zip_shorten',
             'zip_error_1' => 'zip_hyphen',
             'zip_error_2' => 'zip_space',
+            'zip_error_3' => 'zip_space',
         ];
         //
         $data = Filter::exec($base_data, $rules);
@@ -100,6 +102,7 @@ class FilterTest extends \PHPUnit\Framework\TestCase
         }
         $this->assertSame($data['zip_error_1'], '');
         $this->assertSame($data['zip_error_2'], '');
+        $this->assertSame($data['zip_error_3'], '');
 
     }
 
