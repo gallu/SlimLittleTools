@@ -29,13 +29,16 @@ class Validator
         $self->result_flg = true;
         //
         foreach ($rules as $con_name => $rules_string) {
-            //
+            // required が無いとき用のチェックフラグ
+            $required_flg = false;
+            // エラー格納用配列
             $error_mono = [];
+
             // ルールを分割して
             $rules_array = explode('|', $rules_string);
             // ルール単体毎に処理
             foreach ($rules_array as $rule) {
-                // 空文字があったらはじく
+                // ルールで空文字があったらはじく
                 $rule = trim($rule);
                 if ('' === $rule) {
                     continue;
@@ -48,6 +51,11 @@ class Validator
                 } else {
                     // パラメタの切り分け
                     @list($rule, $param) = explode(':', $rule, 2); // XXX エラーチェックはざっくり
+
+                    // required だったらチェックを入れておく
+                    if ('required' === $rule) {
+                        $required_flg = true;
+                    }
 
                     // 処理関数の動的な作成
                     $method = 'validateExec' . ucfirst($rule);
@@ -66,6 +74,11 @@ class Validator
                     $self->result_flg = false;
                     $error_mono[] = $rule;
                 }
+            }
+            // 「必須ではなく」「入力値が空」なら、全てのエラーを「なかった」事にする
+            if ( (false === $required_flg)&&('' === (string)@$data[$con_name]) ) {
+                $self->result_flg = true;
+                $error_mono = [];
             }
             //
             if ([] !== $error_mono) {

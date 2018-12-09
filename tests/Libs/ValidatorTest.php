@@ -97,6 +97,14 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
         //
         $this->assertSame(in_array('t_compare_with_check', $res->getCheckedColmun()), true);
 
+        // 入力が空の時：required が入ってたらfalse、入ってなかったらtrueが返る事
+        $this->assertSame((Validator::validate(['emp' => ''], ['emp' => 'required']))->isValid(), false);
+        $this->assertSame((Validator::validate(['emp' => ''], ['emp' => 'required|alpha']))->isValid(), false);
+        //
+        foreach(['datetime', 'alpha', 'alpha_num', 'min_length:10', 'max_length:100', 'range_length:1-10', 'int', 'zip', 'tel'] as $s) {
+            $this->assertSame((Validator::validate(['emp' => ''], ['emp' => $s]))->isValid(), true, $s);
+        }
+
         // ------------------------
         // invalid
         //

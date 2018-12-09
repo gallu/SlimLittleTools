@@ -70,6 +70,8 @@ PDOとあるが、実際には拡張されたPDOクラス
 ### Validator.php
 
 値が「正しいか」のチェック
+※ required無し、かつ入力が空文字の場合は、validateはtrueを返します
+
 
 - required  必須チェック 
 - datetime  日次フォーマットチェック
