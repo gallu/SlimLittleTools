@@ -63,9 +63,9 @@ PDOとあるが、実際には拡張されたPDOクラス
 - abs  絶対値
 - int  int型へのキャスト
 - string  string型へのキャスト
-- zip_hyphen  ハイフン付きの郵便番号にフォーマット(郵便番号としてinvalidなら空文字)
-- zip_space  スペース付きの郵便番号にフォーマット(郵便番号としてinvalidなら空文字)
-- zip_shorten  数字のみの郵便番号にフォーマット(郵便番号としてinvalidなら空文字)
+- zip_hyphen  ハイフン付きの郵便番号にフォーマット(郵便番号としてinvalidなら入力値をそのまま返す)
+- zip_space  スペース付きの郵便番号にフォーマット(郵便番号としてinvalidなら入力値をそのまま返す)
+- zip_shorten  数字のみの郵便番号にフォーマット(郵便番号としてinvalidなら入力値をそのまま返す)
 
 ### Validator.php
 
