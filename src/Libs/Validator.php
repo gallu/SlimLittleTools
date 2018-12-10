@@ -15,18 +15,11 @@ class Validator
     public static function validate($data, $rules)
     {
         // 自身のインスタンスを作成(戻り値用)
-        $self = new static;
-        // dataとrulesを格納
-        $self->data = $data;
-        $self->rules = $rules;
+        $self = new static();
 
         // 「現状」のメソッド名一覧を把握
         $method_array = array_flip(array_map('strtolower', get_class_methods(get_called_class())));
 
-        // 値格納用領域
-        $self->checked_colmun = [];
-        $self->error = [];
-        $self->result_flg = true;
         //
         foreach ($rules as $con_name => $rules_string) {
             // required が無いとき用のチェックフラグ
@@ -359,7 +352,7 @@ class Validator
 
 
     //private:
-    private $result_flg;
-    private $checked_colmun;
-    private $error;
+    private $result_flg = true;
+    private $checked_colmun = [];
+    private $error = [];
 }
