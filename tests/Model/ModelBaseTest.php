@@ -372,6 +372,30 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         $r = $obj->updateFromRequest($request, $list);
         $this->assertNotSame($r, false);
         $this->assertSame($test_model->val, 'valval1234'); //「修正項目が変わっている」事を確認
+
+        // order byの確認
+        $r = TestModel::insert(['mode_1_id' => '22', 'val' => 'aVal012345', 'val_guard' => 'valguard0123456789', ]);
+        //
+        $data = TestModel::findByAll('val_guard', 'valguard0123456789', 'mode_1_id');
+        //var_dump( DB::getHandle()::getSql() );
+        //var_dump( DB::getHandle()::getData() );
+        $ids = [22, 99, 999];
+        foreach($data as $no => $datum) {
+            $this->assertSame($datum->mode_1_id, $ids[$no]);
+        }
+        //
+        $data = TestModel::findByAll(['val_guard' => 'valguard0123456789'], ['val DESC']);
+        $ids = [99, 999, 22];
+        foreach($data as $no => $datum) {
+            $this->assertSame($datum->mode_1_id, $ids[$no]);
+        }
+
+        //
+        $data = TestModel::findByAll('val_guard', 'valguard0123456789', ['val DESC', 'mode_1_id DESC']);
+        $ids = [999, 99, 22];
+        foreach($data as $no => $datum) {
+            $this->assertSame($datum->mode_1_id, $ids[$no]);
+        }
     }
 
     // 違うDBハンドルを使うクラスの確認

@@ -389,10 +389,11 @@ class ModelBase
      * 簡易的な検索用メソッド(全レコード)
      *
      * @param $p1 string|hash 値がstringの場合「検索のカラム名」となり、$p2がその値となる。値がhashの場合「カラム名と値」の配列となり、ANDで検索する
-     * @param $p2 string $p1の値がstringの場合、$p2がその値となる。値がhashの場合は使われない
+     * @param $p2 string|vector $p1の値がstringの場合、$p2がその値となる。$p1がhash(またはnull)の場合はOEDER BY用の値と見なす
+     * @param $p3 string|vector $p1の値がstringの場合、OEDER BY用の値と見なす
      * @return obj ModelCollectionインスタンス(中にはModelBaseを継承した、Modelクラスのインスタンス)。見つからない場合は空のModelCollectionインスタンス
      */
-    public static function findByAll($p1 = null, $p2 = null)
+    public static function findByAll($p1 = null, $p2 = null, $p3 = null)
     {
         // 前処理
         if ([] === $p1) {
@@ -402,12 +403,39 @@ class ModelBase
         //
         if (is_string($p1)) {
             $where = [$p1 => $p2];
+            $order_by = $p3;
         } elseif (is_array($p1)) {
             $where = $p1;
+            $order_by = $p2;
         } elseif (null === $p1) {
             $where = null;
+            $order_by = $p2;
         } else {
             throw new ModelGuardException('findByメソッドの第一引数がstringでもhashでもないです.');
+        }
+
+        // DBハンドル取得
+        $dbh = static::getDbHandle();
+
+        // ORDER BY情報の整理
+        if (null === $order_by) {
+            $order_by = [];
+        } else if (is_string($order_by)) {
+            // 一旦、配列側に寄せる
+            $order_by = [$order_by];
+        }
+        $order_array = [];
+        foreach($order_by as $order_mono) {
+            // DESCの判定用準備
+            $awk = explode(' ', trim($order_mono));
+            // カラム名の取得
+            $s = $dbh->escapeIdentifier($awk[0]);
+            // DESCの判定
+            if ( (isset($awk[1]))&&(0 === strcasecmp($awk[1], 'desc')) ) {
+                $s .= ' DESC';
+            }
+            //
+            $order_array[] = $s;
         }
 
         // select用パーツ
@@ -422,14 +450,16 @@ class ModelBase
             $p_data = [];
         }
 
-        // DBハンドル取得
-        $dbh = static::getDbHandle();
-
         //
         $sql = 'SELECT * FROM ' . $dbh->escapeIdentifier(static::getProperty('table')) ;
         if (null !== $where) {
             $sql .= ' WHERE ' . implode(' AND ', $where);
         }
+        // ORDER BY
+        if ([] !== $order_array) {
+            $sql .= ' ORDER BY '. implode(', ', $order_array);
+        }
+        // FOR UPDATE
         if (true === $dbh->isTran()) {
             $sql .= ' FOR UPDATE';
         }
