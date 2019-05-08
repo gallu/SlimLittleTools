@@ -374,25 +374,31 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($test_model->val, 'valval1234'); //「修正項目が変わっている」事を確認
 
         // order byの確認
+        $dbh->query('delete from mode_1;');
         $r = TestModel::insert(['mode_1_id' => '22', 'val' => 'aVal012345', 'val_guard' => 'valguard0123456789', ]);
+        $r = TestModel::insert(['mode_1_id' => '999', 'val' => 'valval1234', 'val_guard' => 'valguard0123456789', ]);
+        $r = TestModel::insert(['mode_1_id' => '99', 'val' => 'valval1234', 'val_guard' => 'valguard0123456789', ]);
+        $r = TestModel::insert(['mode_1_id' => '55', 'val' => 'valval1235', 'val_guard' => 'valguard0123456789', ]);
         //
         $data = TestModel::findByAll('val_guard', 'valguard0123456789', 'mode_1_id');
         //var_dump( DB::getHandle()::getSql() );
         //var_dump( DB::getHandle()::getData() );
-        $ids = [22, 99, 999];
+        $ids = [22, 55, 99, 999];
         foreach($data as $no => $datum) {
             $this->assertSame($datum->mode_1_id, $ids[$no]);
         }
-        //
-        $data = TestModel::findByAll(['val_guard' => 'valguard0123456789'], ['val DESC']);
-        $ids = [99, 999, 22];
+        $data = TestModel::findByAll(['val_guard' => 'valguard0123456789'], ['mode_1_id']);
+        foreach($data as $no => $datum) {
+            $this->assertSame($datum->mode_1_id, $ids[$no]);
+        }
+        $data = TestModel::findByAll(['val_guard' => 'valguard0123456789'], 'mode_1_id');
         foreach($data as $no => $datum) {
             $this->assertSame($datum->mode_1_id, $ids[$no]);
         }
 
         //
         $data = TestModel::findByAll('val_guard', 'valguard0123456789', ['val DESC', 'mode_1_id DESC']);
-        $ids = [999, 99, 22];
+        $ids = [55, 999, 99, 22];
         foreach($data as $no => $datum) {
             $this->assertSame($datum->mode_1_id, $ids[$no]);
         }
