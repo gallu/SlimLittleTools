@@ -15,7 +15,7 @@ class ModelValidateException extends \ErrorException
         $this->error_obj = $obj;
         return $this;
     }
-    public function getErrorObj($obj)
+    public function getErrorObj()
     {
         return $this->error_obj;
     }
