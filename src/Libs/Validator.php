@@ -349,6 +349,29 @@ class Validator
         return true;
     }
 
+    /**
+     * 全角カタカナ
+     */
+    public static function validateExecKatakana($datum, $param)
+    {
+        if (1 === preg_match( '/\A[ァ-ヶ 　ー]+\z/u', $datum)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 全角ひらがな
+     */
+    public static function validateExecHirakana($datum, $param)
+    {
+        if (1 === preg_match( '/\A[ぁ-ん 　ー]+\z/u', $datum)) {
+            return true;
+        }
+        return false;
+    }
+
+
 
 
     //private:

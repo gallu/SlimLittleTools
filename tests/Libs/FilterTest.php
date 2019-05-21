@@ -37,6 +37,8 @@ class FilterTest extends \PHPUnit\Framework\TestCase
             't_abs' => '-1',
             't_int' => '100',
             't_string' => 200,
+            't_katakana' => 'ああアアｱｱ',
+            't_hirakana' => 'ああアアｱｱ',
         ];
         $rules = [
             't_trim' => 'trim',
@@ -47,6 +49,8 @@ class FilterTest extends \PHPUnit\Framework\TestCase
             't_abs' => 'abs',
             't_int' => 'int',
             't_string' => 'string',
+            't_katakana' => 'katakana',
+            't_hirakana' => 'hirakana',
         ];
         $data = Filter::exec($base_data, $rules);
 
@@ -59,6 +63,8 @@ class FilterTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($data['t_abs'], 1);
         $this->assertSame($data['t_int'], 100);
         $this->assertSame($data['t_string'], '200');
+        $this->assertSame($data['t_katakana'], 'アアアアアア');
+        $this->assertSame($data['t_hirakana'], 'ああああああ');
 
         // zip
         $base_data = [

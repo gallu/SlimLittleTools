@@ -132,7 +132,21 @@ class Filter
         return static::zipBase($zip, '');
     }
 
+    /**
+     * カタカナひらがなを全角カタカナに変換
+     */
+    public static function filterKatakana($s)
+    {
+        return mb_convert_kana($s, 'KCV', 'UTF-8');
+    }
 
+    /**
+     * カタカナひらがなを全角ひらがなに変換
+     */
+    public static function filterHirakana($s)
+    {
+        return mb_convert_kana($s, 'HcV', 'UTF-8');
+    }
 
 
 

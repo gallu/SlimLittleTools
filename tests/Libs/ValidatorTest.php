@@ -59,6 +59,8 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
             't_tel_7' => '098-765-5678',
             't_tel_8' => '0987-65-5678',
             't_tel_9' => '0120-123-456',
+            't_hirakana' => 'ひらー か　な',
+            't_katakana' => 'カター ッカ　ナ',
         ];
         $rules = [
             't_required' => 'required',
@@ -90,6 +92,8 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
             't_tel_7' => 'tel',
             't_tel_8' => 'tel',
             't_tel_9' => 'tel',
+            't_hirakana' => 'hirakana',
+            't_katakana' => 'katakana',
         ];
         //
         $res = Validator::validate($data, $rules);
@@ -172,6 +176,16 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
         $res = Validator::validate(['t_tel' => 'abc'], ['t_tel' => 'tel']);
         $this->assertSame($res->isValid(), false);
         $res = Validator::validate(['t_tel' => '123456'], ['t_tel' => 'tel']);
+        $this->assertSame($res->isValid(), false);
+        //
+        $res = Validator::validate(['t_hirakana' => 'ヒラー か　な'], ['t_hirakana' => 'hirakana']);
+        $this->assertSame($res->isValid(), false);
+        $res = Validator::validate(['t_hirakana' => 'aaー か　な'], ['t_hirakana' => 'hirakana']);
+        $this->assertSame($res->isValid(), false);
+        //
+        $res = Validator::validate(['t_katakana' => 'ヒラー か　な'], ['t_katakana' => 'katakana']);
+        $this->assertSame($res->isValid(), false);
+        $res = Validator::validate(['t_katakana' => 'aaー か　な'], ['t_katakana' => 'katakana']);
         $this->assertSame($res->isValid(), false);
 
     }
