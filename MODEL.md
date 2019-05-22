@@ -53,7 +53,8 @@ insertないしupdateでエラーが発生した場合はnull(insert)またはfa
 
 ## insert
 
-insertに固有は指定は以下の通りです。
+insertに固有は指定は以下の通りです。    
+ルールは、 |(バーティカルバー)でつなげる事で複数の指定が可能です。    
 
 ```
     // validate系設定
@@ -86,7 +87,41 @@ insert自体は、以下の書式で行います。
 
 `$modelObj = ModelClass::insert(データのhash配列)`
 
-insertしたデータを含むインスタンスが、$modelObjに帰ってきます。
+insertしたデータを含むインスタンスが、$modelObjに帰ってきます。    
+validationを含むコードは、例えば以下のようになります。
+
+```
+try {
+    $modelObj = ModelClass::insert(データのhash配列);
+} catch (\SlimLittleTools\Exception\ModelValidateException $e) {
+    //
+    $error_array = $e->getErrorObj();
+/*
+// 例えば、こんな配列が帰ってきます
+array(2) {
+  ["カラム名"]=>
+  array(1) {
+    [0]=>
+    string(6) "ルール"
+  }
+  ["カラム名"]=>
+  array(2) {
+    [0]=>
+    string(6) "ルール"
+    [1]=>
+    string(6) "ルール"
+  }
+}
+*/
+    // エラー処理
+}
+if (null === $modelObj) {
+    // (validateは成功したが)insertに失敗
+}
+
+// ここに来たらinsert成功
+
+```
 
 ## update
 
@@ -123,7 +158,41 @@ update自体は、以下の書式で行います。
 
 `$r = $modelObj->update(データのhash配列);`
 
-結果として、インスタンスの中身が「引数で渡されたデータの中身」に置き換わります。
+結果として、インスタンスの中身が「引数で渡されたデータの中身」に置き換わります。    
+validationを含むコードは、例えば以下のようになります。
+
+```
+try {
+    $r = $modelObj->update(データのhash配列);
+} catch (\SlimLittleTools\Exception\ModelValidateException $e) {
+    //
+    $error_array = $e->getErrorObj();
+/*
+// 例えば、こんな配列が帰ってきます
+array(2) {
+  ["カラム名"]=>
+  array(1) {
+    [0]=>
+    string(6) "ルール"
+  }
+  ["カラム名"]=>
+  array(2) {
+    [0]=>
+    string(6) "ルール"
+    [1]=>
+    string(6) "ルール"
+  }
+}
+*/
+    // エラー処理
+}
+if (false === $r) {
+    // (validateは成功したが)updateに失敗
+}
+
+// ここに来たらupdate成功
+
+```
 
 ## インスタンスのデータのset/get
 
@@ -160,3 +229,6 @@ $modelObj = ModelClass::findBy(['no_key1' => 1, 'no_key2' = 2]);
 削除は「インスタンスの中にある主キーを削除」します。
 
 `$modelObj->delete();`
+
+
+
