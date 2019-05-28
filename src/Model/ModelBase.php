@@ -71,6 +71,26 @@ class ModelBase
         //'カラム名' => 'ルール',
     ];
 
+    /**
+     * プライマリキー名の取得
+     */
+    public static function getPkName()
+    {
+        return (new static())->pk;
+    }
+    public static function getPrimaryKeyName()
+    {
+        return static::getPkName();
+    }
+
+    /**
+     * プテーブル名の取得
+     */
+    public static function getTableName()
+    {
+        return (new static())->table;
+    }
+
     /*
      * カラムの一覧
      *

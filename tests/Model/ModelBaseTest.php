@@ -172,6 +172,10 @@ class ModelTest extends \PHPUnit\Framework\TestCase
     // -----------------------------------------------
     public function testAll()
     {
+        //
+        $this->assertSame(TestModel::getPkName(), 'mode_1_id');
+        $this->assertSame(TestModel::getTableName(), 'mode_1');
+
         // 先にお掃除
         $dbh = DB::getHandle();
         $dbh->query('delete from mode_1;');
