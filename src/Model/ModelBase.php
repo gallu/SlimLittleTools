@@ -7,8 +7,6 @@ use SlimLittleTools\Exception\ModelValidateException;
 use SlimLittleTools\Exception\DbException;
 
 use SlimLittleTools\Libs\DB;
-use SlimLittleTools\Libs\Filter;
-use SlimLittleTools\Libs\Validator;
 use SlimLittleTools\Model\ModelCollection;
 
 class ModelBase
@@ -38,6 +36,8 @@ class ModelBase
     */
 
     // validate系設定
+    // Validator クラス名
+    protected static $validate_class = '\SlimLittleTools\Libs\Validator';
     // insert固有
     protected $validate_insert = [
         //'カラム名' => 'ルール',
@@ -55,6 +55,8 @@ class ModelBase
     ];
 
     // filterルール設定
+    // Filter クラス名
+    protected static $filter_class = '\SlimLittleTools\Libs\Filter';
     // insert固有
     protected $filter_insert = [
         //'カラム名' => 'ルール',
@@ -132,7 +134,8 @@ class ModelBase
         $rules = static::getProperty('validate_insert', []) + static::getProperty('validate', []);
 
         // 標準のvalidate
-        $res = Validator::validate($data, $rules);
+        $c = static::$validate_class;
+        $res = $c::validate($data, $rules);
 
         return $res;
     }
@@ -142,7 +145,8 @@ class ModelBase
         $rules = static::getProperty('filter_insert', []) + static::getProperty('filter', []);
 
         // filterを実行
-        $data = Filter::exec($data, $rules);
+        $c = static::$filter_class;
+        $data = $c::exec($data, $rules);
 
         // returnした値を実際のvalidateやinsertに使う
         return $data;
@@ -154,7 +158,8 @@ class ModelBase
         $rules = static::getProperty('filter_update', []) + static::getProperty('filter_insert', []) + static::getProperty('filter', []);
 
         // filterを実行
-        $data = Filter::exec($data, $rules);
+        $c = static::$filter_class;
+        $data = $c::exec($data, $rules);
 
         // returnした値を実際のvalidateやinsertに使う
         return $data;
@@ -167,7 +172,8 @@ class ModelBase
         $rules = static::getProperty('validate_update', []) + static::getProperty('validate', []);
 
         // 標準のvalidate
-        $res = Validator::validate($data, $rules);
+        $c = static::$validate_class;
+        $res = $c::validate($data, $rules);
 
         return $res;
     }
@@ -177,7 +183,8 @@ class ModelBase
         $rules = static::getProperty('filter_update', []) + static::getProperty('filter', []);
 
         // filterを実行
-        $data = Filter::exec($data, $rules);
+        $c = static::$filter_class;
+        $data = $c::exec($data, $rules);
 
         // returnした値を実際のvalidateやinsertに使う
         return $data;
