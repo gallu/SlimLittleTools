@@ -64,13 +64,11 @@ class Validator
                 //
                 if (false === $r) {
                     // validateでエラーだった時用の処理
-                    $self->result_flg = false;
                     $error_mono[] = $rule;
                 }
             }
             // 「必須ではなく」「入力値が空」なら、全てのエラーを「なかった」事にする
-            if ( (false === $required_flg)&&('' === (string)@$data[$con_name]) ) {
-                $self->result_flg = true;
+            if ((false === $required_flg) && ('' === (string)@$data[$con_name])) {
                 $error_mono = [];
             }
             //
@@ -80,6 +78,7 @@ class Validator
         }
 
         //
+        $self->result_flg = ([] === $self->error);
         return $self;
     }
 
@@ -370,9 +369,6 @@ class Validator
         }
         return false;
     }
-
-
-
 
     //private:
     private $result_flg = true;
