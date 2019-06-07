@@ -127,6 +127,11 @@ class ModelBase
         $res->addError(['test' => ['hoge'], 'test2' => ['foo']]);
 
      */
+    // insertとupdateで共通の「追加validate処理」用の空メソッド
+    protected static function validateAdditionalRule(\SlimLittleTools\Libs\Validator $res)
+    {
+    }
+
     //
     public static function insertValidate($data)
     {
@@ -136,7 +141,10 @@ class ModelBase
         // 標準のvalidate
         $c = static::$validate_class;
         $res = $c::validate($data, $rules);
+        // 追加ルールの処理
+        static::validateAdditionalRule($res);
 
+        //
         return $res;
     }
     public static function insertFilter($data)
@@ -175,6 +183,10 @@ class ModelBase
         $c = static::$validate_class;
         $res = $c::validate($data, $rules);
 
+        // 追加ルールの処理
+        static::validateAdditionalRule($res);
+
+        //
         return $res;
     }
     public static function updateFilter($data)

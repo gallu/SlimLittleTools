@@ -126,6 +126,18 @@ class TestColumnsList extends ModelBase
         'update_1' => '', // form名が空ならカラム名をそのままform名にする
     ];
 }
+// テスト用モデル(validate additional rule)
+class TestModelAddRule extends ModelBase
+{
+    protected $table = 'mode_no_exist';
+
+    // insertとupdateで共通の「追加validate処理」用の空メソッド
+    protected static function validateAdditionalRule(\SlimLittleTools\Libs\Validator $res)
+    {
+        $res->setResultFalse();
+        $res->addError(['TestModelAddRule' => ['hoge']]);
+    }
+}
 
 
 // テスト本体
@@ -406,6 +418,16 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         foreach($data as $no => $datum) {
             $this->assertSame($datum->mode_1_id, $ids[$no]);
         }
+
+        // validate additional ruleのテスト
+        try {
+            $r = TestModelAddRule::insert([]);
+        } catch (\SlimLittleTools\Exception\ModelValidateException $e) {
+            $o = $e->getErrorObj();
+            $this->assertSame(isset($o['TestModelAddRule']), true);
+            $this->assertSame($o['TestModelAddRule'], ['hoge']);
+        }
+
     }
 
     // 違うDBハンドルを使うクラスの確認
