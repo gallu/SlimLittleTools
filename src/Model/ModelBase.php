@@ -422,6 +422,11 @@ class ModelBase
     public static function findBy($p1, $p2 = null)
     {
         $r = static::findByAll($p1, $p2);
+        // XXX そもそもSQLに失敗しているから、例外投げた方がよいかねぇ？？
+        if (null === $r) {
+            return null;
+        }
+        // else
         return (0 === count($r))? null : $r[0];
     }
     /**
