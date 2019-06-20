@@ -39,17 +39,17 @@
 
 ## insertおよびupdate
 
-この双方は、いくつか類似している部分があるので、重複部分はまとめて説明をします。
+この双方は、いくつか類似している部分があるので、重複部分はまとめて説明をします。    
 insert/updateをする場合は、大まかに
 
 * 事前にデータをフィルタリング(整形)
 * validate(正当性チェック)
 * insertないしupdate
 
-という手順を踏みます。
-フィルタリングは「問答無用でデータを整形」します。
-validateは、結果として「invalidだった」可能性があるため、その場合は SlimLittleTools\Exception\ModelValidateException 例外を吐きます。
-insertないしupdateでエラーが発生した場合はnull(insert)またはfalse(update)をreturnします。
+という手順を踏みます。    
+フィルタリングは「問答無用でデータを整形」します。    
+validateは、結果として「invalidだった」可能性があるため、その場合は SlimLittleTools\Exception\ModelValidateException 例外を吐きます。    
+insertないしupdateでエラーが発生した場合はnull(insert)またはfalse(update)をreturnします。    
 
 ## insert
 
@@ -82,7 +82,7 @@ insertに固有は指定は以下の通りです。
     ];
 ```
 
-基本的には「validate」と「filter」だけを定義しておけばよいと思います。
+基本的には「validate」と「filter」だけを定義しておけばよいと思います。    
 insert自体は、以下の書式で行います。
 
 `$modelObj = ModelClass::insert(データのhash配列)`
@@ -153,13 +153,13 @@ updateに固有は指定は以下の通りです。
     ];
 ```
 
-基本的には「validate」と「filter」だけを定義しておけばよいと思います。
-update自体は、以下の書式で行います。
+基本的には「validate」と「filter」だけを定義しておけばよいと思います。    
+update自体は、以下の書式で行います。    
 
 `$r = $modelObj->update(データのhash配列);`
 
 結果として、インスタンスの中身が「引数で渡されたデータの中身」に置き換わります。    
-validationを含むコードは、例えば以下のようになります。
+validationを含むコードは、例えば以下のようになります。    
 
 ```
 try {
@@ -196,33 +196,53 @@ if (false === $r) {
 
 ## インスタンスのデータのset/get
 
-メソッドとしてget()があります。また __get() を定義しているので「$obj->カラム名」でも取得できます。
-set()メソッドはprotectedなので、基本的に外部には公開していません。インスタンスのデータを変更したい時は、updateメソッドをcallして「DBごと」変更を加えてください(この仕様はあとで変更するかもしれません)。
+メソッドとしてget()があります。また __get() を定義しているので「$obj->カラム名」でも取得できます。    
+set()メソッドはprotectedなので、基本的に外部には公開していません。インスタンスのデータを変更したい時は、updateメソッドをcallして「DBごと」変更を加えてください(この仕様はあとで変更するかもしれません)。    
 
-また、データ全体を取得したい時は「toArray()」メソッドで「ハッシュ配列」を取り出す事ができます。
+また、データ全体を取得したい時は「toArray()」メソッドで「ハッシュ配列」を取り出す事ができます。    
 
 ## 検索
 
-主キーが単一の場合は、以下で取得できます。
+主キーが単一の場合は、以下で取得できます。    
 
 ```
 $modelObj = ModelClass::find(1);
 ```
 
-主キーが複合の場合は、以下で取得できます。
+主キーが複合の場合は、以下で取得できます。    
 
 ```
 $modelObj = ModelClass::find(['key1' => 1, 'key2' = 2]);
 ```
 
-また、主キー以外で検索をしたい場合は、以下で可能です。
+また、主キー以外で検索をしたい場合は、以下で可能です。    
 
 ```
+$modelObj = ModelClass::findBy('no_key1'、1);
 $modelObj = ModelClass::findBy(['no_key1' => 1, 'no_key2' = 2]);
 ```
 
-なお、findByは一端「1レコード」を想定しています。
-「全レコード」を取得したい場合は「findByAll()」メソッドを利用してください。使い方は一緒ですが、returnがSlimLittleTools\Model\ModelCollectionクラス(ほぼarrayObject。toArray()メソッドだけ生やしてある)が帰ってきます。
+なお、findByは「1レコード」を想定しています。複数レコードが帰ってきてしまうような検索条件の場合、どのレコードになるかは「不定」です。    
+「全レコード」を取得したい場合は「findByAll()」メソッドを利用してください。使い方は一緒ですが、returnがSlimLittleTools\Model\ModelCollectionクラス(ほぼarrayObject。toArray()メソッドだけ生やしてある)が帰ってきます。    
+
+```
+$modelCollectionObj = ModelClass::findByAll('no_key1', 1);
+$modelCollectionObj = ModelClass::findByAll(['no_key1' => 1, 'no_key2' = 2]);
+```
+
+また、findByAllは、ソート順を指定できます。    
+
+```
+$modelCollectionObj = ModelClass::findByAll('no_key1', 1, 'ソートカラム名');
+$modelCollectionObj = ModelClass::findByAll(['no_key1' => 1, 'no_key2' = 2], 'ソートカラム名');
+```
+
+ソートカラム名は
+
+* カンマで区切ると、複数指定できます(例: 'col_1, col_2')
+* desc(DESC)を書くと、降順が指定できます(例: 'col_1 DESC')
+* 上述は、組み合わせる事ができます(例: 'col_1, col_2 DESC')
+
 
 ## 削除
 
