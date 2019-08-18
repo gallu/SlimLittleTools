@@ -12,7 +12,7 @@ class Validator
     /**
      * validate処理
      */
-    public static function validate($data, $rules)
+    public static function validate($data, $rules, $update_flg = false)
     {
         // 自身のインスタンスを作成(戻り値用)
         $self = new static();
@@ -22,6 +22,11 @@ class Validator
 
         //
         foreach ($rules as $con_name => $rules_string) {
+            // update_flgがtrueの時でdataにkeyがなければ「部分的なupdate」なのでチェック省略
+            if ( (true === $update_flg)&&(false === isset($data[$con_name])) ) {
+                continue;
+            }
+
             // required が無いとき用のチェックフラグ
             $required_flg = false;
             // エラー格納用配列

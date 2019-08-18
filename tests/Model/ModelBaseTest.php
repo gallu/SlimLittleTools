@@ -15,6 +15,7 @@ DROP TABLE IF EXISTS mode_1;
 CREATE TABLE mode_1 (
   mode_1_id VARCHAR(64) NOT NULL,
   val VARCHAR(64),
+  val2 VARCHAR(64),
   val_guard VARCHAR(64),
   created_at DATETIME,
   updated_at DATETIME,
@@ -169,7 +170,7 @@ class ModelTest extends \PHPUnit\Framework\TestCase
     protected function setUp()
     {
         // リアルなDB接続が必要なので、一旦スキップ
-        $this->markTestSkipped();
+        //$this->markTestSkipped();
     }
     // -----
     // テストメソッドごとの終了メソッド
@@ -230,6 +231,10 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         $r = $test_model->update(['val' => 'valval1234', 'val_guard' => 'valguard0123456789']);
         $this->assertNotSame($r, false);
         $this->assertSame($test_model->val, 'valval1234'); //「修正項目が変わっている」事を確認
+
+        // 省略付きのupdate
+        $r = $test_model->update(['val2' => 'Val0123456788']);
+        $this->assertSame($r, true);
 
         // findBy
         $obj = TestModel::findBy('val_guard', 'valguard0123456789');

@@ -181,7 +181,7 @@ class ModelBase
 
         // 標準のvalidate
         $c = static::$validate_class;
-        $res = $c::validate($data, $rules);
+        $res = $c::validate($data, $rules, true);
 
         // 追加ルールの処理
         static::validateAdditionalRule($res);
