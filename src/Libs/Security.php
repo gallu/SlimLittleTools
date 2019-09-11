@@ -20,8 +20,8 @@ class Security
         //
         if (is_array($val)) {
             $ret = [];
-            foreach ($val as $v) {
-                $ret[] = static::checkEncoding($v);
+            foreach ($val as $k => $v) {
+                $ret[$k] = static::checkEncoding($v);
             }
             return $ret;
         }
