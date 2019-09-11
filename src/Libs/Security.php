@@ -21,12 +21,11 @@ class Security
         if (is_array($val)) {
             $ret = [];
             foreach ($val as $v) {
-                $ret[] = $this->getParamCheck($v);
+                $ret[] = static::checkEncoding($v);
             }
             return $ret;
         }
         // else
-        // ここには来ないと思うが………
-        return null;
+        return $val;
     }
 }
