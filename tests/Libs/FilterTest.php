@@ -126,4 +126,20 @@ class FilterTest extends \PHPUnit\Framework\TestCase
     {
         $data = Filter::exec(['test' => '1'], ['test' => 'int|string|hoge']);
     }
+
+    //
+    public function testEmptyNull()
+    {
+        //
+        $data = Filter::exec(['test' => ""], ['test' => 'empty_string_to_null']);
+        $this->assertSame($data['test'], null);
+        //
+        $data = Filter::exec(['test' => null], ['test' => 'empty_string_to_null']);
+        $this->assertSame($data['test'], null);
+        //
+        $data = Filter::exec(['test' => ' '], ['test' => 'empty_string_to_null']);
+        $this->assertNotSame($data['test'], null);
+    }
+
+
 }

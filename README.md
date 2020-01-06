@@ -56,6 +56,7 @@ PDOとあるが、実際には拡張されたPDOクラス
 ルールを複数記述する場合は、 | でつなげてください。
 
 - trim  trim関数で前後の空白などを除去
+- empty_string_to_null　空文字ならNULLに変換する
 - strtolower  strtolower関数で処理(英字をすべて小文字にする) 
 - strtoupper  strtoupper関数で処理(英字をすべて大文字にする)
 - floor  端数の切り捨て(型はfloat型になる)

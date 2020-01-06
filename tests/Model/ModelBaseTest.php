@@ -170,7 +170,7 @@ class ModelTest extends \PHPUnit\Framework\TestCase
     protected function setUp()
     {
         // リアルなDB接続が必要なので、一旦スキップ
-        //$this->markTestSkipped();
+        $this->markTestSkipped();
     }
     // -----
     // テストメソッドごとの終了メソッド

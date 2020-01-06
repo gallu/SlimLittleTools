@@ -148,8 +148,12 @@ class Filter
         return mb_convert_kana($s, 'HcV', 'UTF-8');
     }
 
-
-
-
+    /**
+     * 空文字をnullに変換
+     */
+    public static function filterEmpty_string_to_null($s)
+    {
+        return '' === $s ? null : $s;
+    }
 
 }
