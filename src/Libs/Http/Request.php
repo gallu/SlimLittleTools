@@ -29,11 +29,14 @@ class Request extends \Slim\Http\Request
     /**
      * 指定したパラメタをまとめて取得
      */
-    public function getSpecifiedParams($params)
+    public function getSpecifiedParams($params, $add_null_flg = false)
     {
         $ret = [];
         foreach ($params as $name) {
-            $ret[$name] = $this->getParam($name);
+            $v = $this->getParam($name);
+            if ( (true === $add_null_flg) || (null !== $v) ) {
+                $ret[$name] = $v;
+            }
         }
         return $ret;
     }

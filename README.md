@@ -108,7 +108,8 @@ deleteメソッドを追加。
 ### Request.php
 
 getParam等について、「非最短形式の場合には空文字を返す」ようにチェック(Param's'系はそのフックを入れていないので注意)。   
-getSpecifiedParams()メソッドの追加(引数で渡した配列のカラムをまとめて取得)。    
+getSpecifiedParams()メソッドの追加(引数で渡した配列のカラムをまとめて取得: 指定されたkeyがGET/POSTに存在しない場合、keyは作成されません)。    
+getSpecifiedParams()メソッドに第二引数で true を明示的に渡すと、指定されたkeyがGET/POSTに存在しない場合に「値がNULL」でkeyが作成されます。    
 
 ## ./Middleware:
 

@@ -85,10 +85,30 @@ class RequestTest extends \PHPUnit\Framework\TestCase
         $request = Request::createFromEnvironment($environment);
 
         //
-        $data = $request->getSpecifiedParams(['a', 'c']);
+        $data = $request->getSpecifiedParams(['a', 'c', 'f']);
         $this->assertSame(isset($data['a']), true);
         $this->assertSame(isset($data['c']), true);
         $this->assertSame(isset($data['b']), false);
         $this->assertSame(isset($data['d']), false);
+        //
+        $this->assertSame(isset($data['f']), false); // 「指定されているけど存在しないパラメタ」はkeyとして取り込まれていない事、の確認
+
+        //
+        // Create a mock environment for testing with
+        $environment = Environment::mock(
+            [
+                'REQUEST_METHOD' => 'GET',
+                'REQUEST_URI' => '/?a=1',
+            ]
+        );
+
+        // Set up a request object based on the environment
+        $request = Request::createFromEnvironment($environment);
+
+        //
+        $data = $request->getSpecifiedParams(['a', 'c'], true);
+        $this->assertSame(isset($data['a']), true);
+        $this->assertSame(array_key_exists('c', $data), true); // 値がNULLなのでissetだと調べられないのでarray_key_existsで確認
+        $this->assertSame($data['c'], null);
     }
 }
