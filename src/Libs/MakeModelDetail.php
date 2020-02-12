@@ -5,7 +5,7 @@ namespace SlimLittleTools\Libs;
 /**
  * DBのカラム名一覧を取得するクラス
  */
-class MackModelDetail
+class MakeModelDetail
 {
     // 実行ポイント
     public static function exec(array $argv)
