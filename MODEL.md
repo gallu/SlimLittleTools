@@ -250,5 +250,21 @@ $modelCollectionObj = ModelClass::findByAll(['no_key1' => 1, 'no_key2' = 2], '�
 
 `$modelObj->delete();`
 
+## Detail の作成
 
+[gallu作成 Slim-Skeleton](https://github.com/gallu/Slim-Skeleton) にも[コード](https://github.com/gallu/Slim-Skeleton/blob/master/make_model_detail.php)がありますが、Detailを作成する事が出来ます。    
+Detailは現状「Modelディレクトリの下にDetailディレクトリがある」前提になっているので、ディレクトリを切っておいてください。    
+Detailを作ると、以下のメリットがあります。    
 
+- テーブル名、PK名を自動でDBから取得してきます
+- カラム名、コメント、型をDBから取得してきます。そのため、以下のメソッドが使えるようになります。いずれもstaticです
+  + getAllColmuns() : array 全カラム名を配列で取得します
+  + getAllColmunsWithComment() : array 全カラム名をコメント情報付きで取得します。[ カラム名 => コメント, ...]のフォーマットです
+    - 引数にdelimiter文字を渡すと「コメントをdelimiterで区切った最初の要素のみ」を切り出します。そのため、例えばカラムのコメントで「論理名: 補足説明」といったフォーマットの時に getAllColmunsWithComment(':') と呼び出すと「論理名だけ」が取得出来ます
+  + getAllColmunsWithoutPk() : array PKを除く全カラム名を配列で取得します
+  + getAllColmunsWithCommentWithoutPk() : array PKを除く全カラム名をコメント情報付きで取得します。[ カラム名 => コメント, ...]のフォーマット>です
+    - 引数にdelimiter文字を渡すと「コメントをdelimiterで区切った最初の要素のみ」を切り出します。そのため、例えばカラムのコメントで「論理名: 補足説明」といったフォーマットの時に getAllColmunsWithComment(':') と呼び出すと「論理名だけ」が取得出来ます
+  + isColumnTypeDate($name) : bool 対象カラムの型が「日付かどうか」の判定をします。日付型(DATE | DATETIME | TIMESTAMP)であればtrue、それ以外はfalseを返します
+
+使う時は、Modelの中でuseします。    
+[Slim-Skeletonの中のサンプルコード](https://github.com/gallu/Slim-Skeleton/blob/master/app/Model/SampleTable.php)を参考にしてください。
