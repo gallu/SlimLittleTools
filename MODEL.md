@@ -268,3 +268,27 @@ Detailを作ると、以下のメリットがあります。
 
 使う時は、Modelの中でuseします。    
 [Slim-Skeletonの中のサンプルコード](https://github.com/gallu/Slim-Skeleton/blob/master/app/Model/SampleTable.php)を参考にしてください。
+
+### Detailとの併用による「日付系カラム」で空文字が入ってきた時の挙動の変更
+
+以下の挙動は「isDateEmptyStringToNull()メソッドがtrueを返してきた時」のみ動きます。また、デフォルトは一端「false」にしてあります。    
+そのため、以下を「使いたい」場合は、isDateEmptyStringToNull()メソッドを上書きしてtrueを返すようにしてください。    
+
+「入力が必須ではない」日付カラムに空文字を入れようとした場合、特にMySQLにおいて「0000-00-00」が入る事があります(STRICT_TRANS_TABLESがmodeで指定されていない時、等)。    
+また一方で、HTMLのformからデータを取り込む場合「未入力なら空文字になる(==NULLにはならない)」事、及びINSERT時に「DEFAULTが設定されている時に、明示的にNULLをVALUESに入れるとDEFAULT値にならない」などの問題がある事から
+
+- 日付カラムにおいて、空文字が指定されている場合は「そもそもINSERTのVALUESやUPDATEのSETに、そのカラムの指定自体がないほうが都合がよい」
+
+事があるかと思います。
+
+
+上述を前提にして。
+
+- Detailを使う等して、isColumnTypeDate()が適切に機能している
+- isDateEmptyStringToNull()メソッドがtrueを返す
+
+の2つの条件を満たしている場合に限って、insert及びupdate時に
+
+- カラム型がDATE系(isColumnTypeDate()でtrueが帰ってくる)、かつデータがNULLまたは空文字の場合、INSERTのVALUES、UPDATEのSETから削除する
+
+という動きをするように追加しました。

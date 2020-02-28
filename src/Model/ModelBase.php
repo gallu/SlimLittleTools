@@ -133,6 +133,43 @@ class ModelBase
     {
     }
 
+    /**
+     * 「日付カラムで空文字が入ってきたらinsertとupdateの時にデータをNULLにする」チェック
+     *
+     * 基本的に「Detail」がuseされている前提です。使う時は、軽傷先クラスでメソッドを上書きしてtrueを返すようにしてください
+     *
+     * @return boolean trueなら「日付型で空文字が入ってきたらNULLに置換する」処理を追加
+     */
+    protected static function isDateEmptyStringToNull()
+    {
+        return false;
+    }
+
+    /**
+     * 「日付カラムで空文字が入ってきたらinsertとupdateの時にデータをNULLにする」用データ処理
+     * 
+     * 基本的に「Detail」がuseされている前提です。isColumnTypeDate() メソッドが存在しない場合、エラーになります。
+     *
+     * @param array $data insertまたはupdateしようとしている情報
+     * @return array 「カラム型が日付 かつ データが空文字」のkeyをnullにしたdata
+     */
+    public static function deleteEmptyDates($data)
+    {
+        // 先にメソッドチェック
+        if (false === method_exists(static::class, 'isColumnTypeDate')) {
+            throw new  \ErrorException('deleteEmptyDates() がcallされていますが、isColumnTypeDate()が存在していません。Detailをuseしてください。');
+        }
+        // データのチェックと加工
+        foreach($data as $k => $v) {
+            if ( (true === static::isColumnTypeDate($k))&&( '' === $v) ) {
+                $data[$k] = null;
+            }
+        }
+        //
+        return $data;
+    }
+
+
     //
     public static function insertValidate($data)
     {
@@ -366,6 +403,11 @@ class ModelBase
             unset($data[$del_column]);
         }
 
+        // 日付カラム用処理
+        if (true === static::isDateEmptyStringToNull()) {
+            $data = static::deleteEmptyDates($data);
+        }
+
         // insert用パーツ
         list($cols, $vals, $p_data) = static::makeSqlParts($data);
 
@@ -583,6 +625,11 @@ class ModelBase
         // dataからはpkを消しておく
         foreach ($pk as $k) {
             unset($data[$k]);
+        }
+
+        // 日付カラム用処理
+        if (true === static::isDateEmptyStringToNull()) {
+            $data = static::deleteEmptyDates($data);
         }
 
         // update用パーツ

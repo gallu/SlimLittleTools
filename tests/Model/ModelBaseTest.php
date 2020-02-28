@@ -39,6 +39,16 @@ CREATE TABLE mode_3 (
   PRIMARY KEY(mode_3_id)
 );
 
+DROP TABLE IF EXISTS model_date;
+CREATE TABLE model_date (
+  mode_date_id INT NOT NULL AUTO_INCREMENT,
+  s varchar(16),
+  date_1 DATE DEFAULT NULL,
+  date_2 DATETIME DEFAULT '1999-7-31 00:11:22',
+  PRIMARY KEY(mode_date_id)
+);
+
+
 */
 
 // テスト用モデル
@@ -139,6 +149,55 @@ class TestModelAddRule extends ModelBase
         $res->addError(['TestModelAddRule' => ['hoge']]);
     }
 }
+// テスト用モデル(日付で「空なら入れない」)
+class TestModelDate extends ModelBase
+{
+    protected $table = 'model_date';
+    // pk
+    protected $pk = 'mode_date_id';
+    protected $auto_increment = true;
+
+    // カラム型一覧
+    protected $colmuns_type = [
+        'mode_date_id' => 'bigint(20) unsigned',
+        's' => 'varchar(16)',
+        'date_1' => 'date',
+        'date_2' => 'datetime',
+    ];
+
+    //
+    protected static function isDateEmptyStringToNull()
+    {
+        return true;
+    }
+    //
+    public static function isColumnTypeDate(string $name)
+    {
+        // 先に確認
+        $list = (new static())->colmuns_type;
+        if (false === isset($list[$name])) {
+            throw new \ErrorException('存在しないカラム名が指定されました');
+
+        }
+        // 型の把握
+        $type = strtolower($list[$name]);
+
+        // 判定
+        // DATE または DATETIME
+        if ( ('date' === $type) || ('datetime' === $type) ) {
+            return true;
+        }
+        // "TIMESTAMP"は、RDBによっては「 without time zone」とか「with time zone」とか付くようなので少し配慮
+        // あと、このロジックだと timestamptz(PostgreSQL独自拡張)も一応拾える想定
+        if (0 === strncmp('timestamp', $type, 9)) {
+            return true;
+        }
+
+        // 上述以外ならfalse
+        return false;
+    }
+
+}
 
 
 // テスト本体
@@ -191,8 +250,10 @@ class ModelTest extends \PHPUnit\Framework\TestCase
 
         // 先にお掃除
         $dbh = DB::getHandle();
-        $dbh->query('delete from mode_1;');
-        $dbh->query('delete from mode_2;');
+        $dbh->query('TRUNCATE TABLE mode_1;');
+        $dbh->query('TRUNCATE TABLE mode_2;');
+        $dbh->query('TRUNCATE TABLE mode_3;');
+        $dbh->query('TRUNCATE TABLE model_date;');
 
         // checkPkの確認
         // 単キー 2種
@@ -432,6 +493,47 @@ class ModelTest extends \PHPUnit\Framework\TestCase
             $this->assertSame(isset($o['TestModelAddRule']), true);
             $this->assertSame($o['TestModelAddRule'], ['hoge']);
         }
+
+
+        // 「日付で空文字なら削除」処理のテスト
+        $data = [
+            's' => 'aaa',
+            'date_1' => '1970-1-1',
+            'date_2' => '1970-1-1',
+        ];
+        $data = TestModelDate::deleteEmptyDates($data);
+        // データが消えていない事を一応確認
+        $this->assertSame($data['date_1'], '1970-1-1');
+        $this->assertSame($data['date_2'], '1970-1-1');
+        // データがnullになる事を確認
+        $data = [
+            's' => '',
+            'date_1' => '',
+            'date_2' => '',
+        ];
+        $data = TestModelDate::deleteEmptyDates($data);
+        $this->assertSame($data['s'], '');
+        $this->assertSame($data['date_1'], null);
+        $this->assertSame($data['date_2'], null);
+
+        // insertでNULLになる事を確認
+        $obj = TestModelDate::insert(['s' => 'abc', 'date_1' => '', 'date_2' => '']);
+        $id = $obj->mode_date_id;
+        $obj = TestModelDate::find($id);
+        $this->assertSame($obj->date_1, null);
+        $this->assertSame($obj->date_2, null);
+
+        // updateで一端日付を入れる
+        $obj->update(['date_1' => '1970-1-1', 'date_2' => '1970-1-1 00:11:22']);
+        $obj = TestModelDate::find($id);
+        $this->assertSame($obj->date_1, '1970-01-01');
+        $this->assertSame($obj->date_2, '1970-01-01 00:11:22');
+
+        // updateで空文字を渡してNULLになる事を確認
+        $obj->update(['date_1' => '', 'date_2' => '']);
+        $obj = TestModelDate::find($id);
+        $this->assertSame($obj->date_1, null);
+        $this->assertSame($obj->date_2, null);
 
     }
 
