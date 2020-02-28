@@ -97,6 +97,7 @@ class ModelBase
      * カラムの一覧
      *
      * XXX 基本的に requestで入ってくるform情報とぶつけてデータを出す用に想定：なのでkeyはformのnameアトリビュート値(略してform名)
+     * @deprecated
      */
     // INSERTとUPDATEで共通のカラム
     protected static $columns_list = [
@@ -751,6 +752,7 @@ class ModelBase
      * insert用のカラム一覧
      *
      * 配列は「[form名] = 'カラム名'」のフォーマット。form名==カラム名の時は、カラム名が空文字
+     * @deprecated
      */
     public static function getInsertColumnsList()
     {
@@ -760,6 +762,7 @@ class ModelBase
      * update用のカラム一覧
      *
      * 配列は「[form名] = 'カラム名'」のフォーマット。form名==カラム名の時は、カラム名が空文字
+     * @deprecated
      */
     public static function getUpdateColumnsList()
     {
@@ -772,6 +775,7 @@ class ModelBase
      * @param \SlimLittleTools\Libs\Http\Request $request リクエストインスタンス
      * @param array $list カラムの配列。デフォルト([])の場合は static::getInsertColumnsList() の値を使う
      * @return any insertメソッドに準じる
+     * @deprecated
      */
     public static function insertFromRequest(\SlimLittleTools\Libs\Http\Request $request, $list = [])
     {
@@ -792,6 +796,7 @@ class ModelBase
      * @param \SlimLittleTools\Libs\Http\Request $request リクエストインスタンス
      * @param array $list カラムの配列。デフォルト([])の場合は static::getUpdateColumnsList() の値を使う
      * @return any updateメソッドに準じる
+     * @deprecated
      */
     public function updateFromRequest(\SlimLittleTools\Libs\Http\Request $request, $list = [])
     {
@@ -808,6 +813,7 @@ class ModelBase
 
     /**
      * 「formからデータ取得して配列を整形する」辺りを切り出した共通処理
+     * @deprecated
      */
     protected static function _getDataFromRequest(\SlimLittleTools\Libs\Http\Request $request, $list)
     {
