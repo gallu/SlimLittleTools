@@ -111,6 +111,8 @@ getParam等について、「非最短形式の場合には空文字を返す」
 getSpecifiedParams()メソッドの追加(引数で渡した配列のカラムをまとめて取得: 指定されたkeyがGET/POSTに存在しない場合、keyは作成されません)。    
 getSpecifiedParams()メソッドに第二引数で true を明示的に渡すと、指定されたkeyがGET/POSTに存在しない場合に「値がNULL」でkeyが作成されます。    
 
+getSrcIp()メソッドを使うと「アクセス元のIPアドレス」が取得できます。あればHTTP_X_FORWARDED_FOR、無ければREMOTE_ADDRを見に行きます。それ以外のnameで入ってくる場合、引数での指定も可能です。    
+
 ## ./Middleware:
 
 ### AddHeader.php

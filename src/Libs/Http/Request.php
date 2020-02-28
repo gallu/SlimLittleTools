@@ -40,4 +40,23 @@ class Request extends \Slim\Http\Request
         }
         return $ret;
     }
+
+    /**
+     * リクエストされたIPアドレスを返す
+     *
+     * 一端「HTTP_X_FORWARDED_FOR または REMOTE_ADDR」を想定。一応外からも「個別の(優先順位の高い)名前」を指定出来るようにはしておく
+     */
+    public function getSrcIp(array $env_name = []) : string
+    {
+        // XXX 特別に指定があった場合で「その名前があった」場合はそれを返す
+        foreach($env_name as $s) {
+            if ('' !== ($ip = $this->getServerParam($s, ''))) {
+                return $ip;
+            }
+        }
+        // else
+        $ip = $this->getServerParam('HTTP_X_FORWARDED_FOR') ?? $this->getServerParam('REMOTE_ADDR', '');
+        return $ip;
+    }
+
 }

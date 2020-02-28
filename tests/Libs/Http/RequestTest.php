@@ -111,4 +111,45 @@ class RequestTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(array_key_exists('c', $data), true); // 値がNULLなのでissetだと調べられないのでarray_key_existsで確認
         $this->assertSame($data['c'], null);
     }
+
+    //
+    public function testSrcIp()
+    {
+        // Create a mock environment for testing with
+        $request = Request::createFromEnvironment(
+            Environment::mock(
+                [
+                    'REMOTE_ADDR' => '1.1.1.1',
+                ]
+            )
+        );
+        $this->assertSame($request->getSrcIp(), '1.1.1.1');
+
+        //
+        // Create a mock environment for testing with
+        $request = Request::createFromEnvironment(
+            Environment::mock(
+                [
+                    'REMOTE_ADDR' => '1.1.1.1',
+                    'HTTP_X_FORWARDED_FOR' => '2.2.2.2',
+                ]
+            )
+        );
+        $this->assertSame($request->getSrcIp(), '2.2.2.2');
+
+        //
+        // Create a mock environment for testing with
+        $request = Request::createFromEnvironment(
+            Environment::mock(
+                [
+                    'REMOTE_ADDR' => '1.1.1.1',
+                    'HTTP_X_FORWARDED_FOR' => '2.2.2.2',
+                    'HTTP_X_FORWARDED_XXX' => '3.3.3.3',
+                ]
+            )
+        );
+        $this->assertSame($request->getSrcIp(), '2.2.2.2');
+        $this->assertSame($request->getSrcIp(['HOGE', 'HTTP_X_FORWARDED_XXX']), '3.3.3.3');
+    }
+
 }
