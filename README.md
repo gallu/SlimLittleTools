@@ -1,11 +1,11 @@
 # SlimLittleTools
 
-Slim Framework用の、比較的小さなツール群です。
+Slim Framework(3.x)用の、比較的小さなツール群です。    
 
 ## インストールについて
 
 ```
-composer require gallu/slim-littie-tools
+composer require gallu/slim-littie-tools:^0.0
 ```
 
 でインストールしてください。
