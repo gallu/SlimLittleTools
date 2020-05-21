@@ -1,7 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools\Libs;
 
+use Psr\Container\ContainerInterface;
 use SlimLittleTools\WithStaticContainerBase;
 
 /**
@@ -10,21 +12,41 @@ use SlimLittleTools\WithStaticContainerBase;
 
 class DB extends WithStaticContainerBase
 {
-    public static function setContainer($container)
+    public static function setContainer(ContainerInterface $container)
     {
         //
         parent::setContainer($container);
         //
-        $keys = $container->get('settings')->keys();
+        $make_class = new class($container) {
+            private $container;
+            public function __construct($container) {
+                $this->container = $container;
+            }
+            public function make($name) {
+                // nameからdataの取得
+                $data = $this->container->get('settings')[$name];
+                // 接続クラスに投げる
+                $class = (string)@$data['connect_class'];
+                if ('' === $class) {
+                    $class = '\SlimLittleTools\Libs\ConnectPDO';
+                }
+                //
+                return $class::connect($data);
+            }
+        };
+
+
+        //
+        $keys = array_keys($container->get('settings'));
         // デフォルトのDBハンドル設定
         if ((in_array('db', $keys))&&(false === $container->has('db'))) {
-            $container['db'] = new ContainerDbConnect('db');
+            $container->set('db', function() use ($make_class){ return $make_class->make('db'); } );
         }
 
         // 拡張のDBハンドル設定
         foreach ($keys as $key) {
             if (0 === strncmp('db_', $key, 3)) {
-                $container[$key] = new ContainerDbConnect($key);
+                $container->set($key, function() use ($key, $make_class){ return $make_class->make($key); } );
             }
         }
     }
@@ -46,23 +68,4 @@ class DB extends WithStaticContainerBase
 // DB接続へのラッパー
 class ContainerDbConnect
 {
-    public function __construct($name)
-    {
-        $this->name = $name;
-    }
-    //
-    public function __invoke($container)
-    {
-        // nameからdataの取得
-        $data = $container->get('settings')[$this->name];
-        // 接続クラスに投げる
-        $class = (string)@$data['connect_class'];
-        if ('' === $class) {
-            $class = '\SlimLittleTools\Libs\ConnectPDO';
-        }
-        //
-        return $class::connect($data);
-    }
-//
-    private $name;
 }

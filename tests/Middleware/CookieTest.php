@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools\Tests\Middleware;
 
@@ -8,25 +9,15 @@ use SlimLittleTools\Libs\Http\Request;
 use Slim\Http\Environment;
 use Slim\Http\Response;
 
-class CookieTest extends \PHPUnit\Framework\TestCase
+class CookieTest extends \SlimLittleTools\Tests\TestBase
 {
-    // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
-    {
-    }
     // テストメソッドごとの開始前メソッド
-    protected function setUp()
+    protected function setUp() : void
     {
+        // 一端スキップ
+        $this->markTestSkipped();
     }
-    // -----
-    // テストメソッドごとの終了メソッド
-    protected function tearDown()
-    {
-    }
-    // 一回だけ実行される終了メソッド
-    public static function tearDownAfterClass()
-    {
-    }
+
     // -----------------------------------------------
 
     public function testAddHeader()

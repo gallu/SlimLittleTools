@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools;
+
+use Psr\Container\ContainerInterface;
 
 /**
  * Slim PHP micro frameworkで「コンストラクタでcontainerインスタンスを受け取る」クラス用の基底クラス
@@ -14,7 +17,7 @@ class WithContainerBase
      * コンストラクタ
      *
      */
-    public function __construct($container)
+    public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
     }

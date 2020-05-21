@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools\Tests\Libs;
 
@@ -7,10 +8,10 @@ use SlimLittleTools\Libs\Container;
 class ContainerTestHoge {
 }
 
-class ContainerTest extends \PHPUnit\Framework\TestCase
+class ContainerTest extends \SlimLittleTools\Tests\TestBase
 {
     // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
         $settings = [
             'settings' => [
@@ -18,31 +19,29 @@ class ContainerTest extends \PHPUnit\Framework\TestCase
             ],
         ];
         //
-        $app = new \Slim\App($settings);
-        $container = $app->getContainer();
-        //
-        Container::setContainer($container);
-        // XXX あえて後ろに
-        $container['test'] = function($c) {
+        $settings['test'] = function($c) {
             $obj = new \stdClass();
             return $obj;
         };
-        $container['hoge'] = function($c) {
+        $settings['hoge'] = function($c) {
             $obj = new ContainerTestHoge();
             return $obj;
         };
+        //
+        $app = static::getApp($settings);
+        Container::setContainer($app->getContainer());
     }
     // テストメソッドごとの開始前メソッド
-    protected function setUp()
+    protected function setUp() : void
     {
     }
     // -----
     // テストメソッドごとの終了メソッド
-    protected function tearDown()
+    protected function tearDown() : void
     {
     }
     // 一回だけ実行される終了メソッド
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass() : void
     {
     }
     // -----------------------------------------------
@@ -50,7 +49,7 @@ class ContainerTest extends \PHPUnit\Framework\TestCase
     public function testAny()
     {
         //
-        $this->assertSame(get_class(Container::getContainer()), 'Slim\\Container');
+        $this->assertSame(get_class(Container::getContainer()), 'DI\\Container');
 
         //
         $this->assertSame(get_class(Container::get('test')), 'stdClass');

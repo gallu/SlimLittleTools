@@ -1,33 +1,16 @@
 <?php
+declare(strict_types=1);
 
 use SlimLittleTools\WithStaticContainerBase;
-use Slim\Collection;
 
-class WithStaticContainerBaseTest extends \PHPUnit\Framework\TestCase
+class WithStaticContainerBaseTest extends \SlimLittleTools\Tests\TestBase
 {
-    // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
-    {
-    }
-    // テストメソッドごとの開始前メソッド
-    protected function setUp()
-    {
-    }
-    // -----
-    // テストメソッドごとの終了メソッド
-    protected function tearDown()
-    {
-    }
-    // 一回だけ実行される終了メソッド
-    public static function tearDownAfterClass()
-    {
-    }
     // -----------------------------------------------
 
     //
     public function testSetContainer()
     {
-        $r = WithStaticContainerBase::setContainer(new Collection());
+        $r = WithStaticContainerBase::setContainer(static::getContainer());
         $this->assertSame($r, null);
     }
 }

@@ -1,16 +1,14 @@
 # SlimLittleTools
 
-Slim Framework用の、比較的小さなツール群です。
+Slim Framework(4.x)用の、比較的小さなツール群です。
 
 ## インストールについて
 
 ```
-composer require gallu/slim-littie-tools
+composer require gallu/slim-littie-tools:^v1.0
 ```
 
 でインストールしてください。
-
-## ./:
 
 ### StaticBase.php
 
@@ -119,10 +117,6 @@ getSrcIp()メソッドを使うと「アクセス元のIPアドレス」が取�
 
 主にセキュリティ上などの理由で「入れておきたい」ヘッダを追加で仕込みます。    
 上書き等したい場合は、$setting['setting']['add_response_header'] に、[ key => value ]の形式で記述すると、上書きされます。
-
-### Cookie.php
-
-「containerにCookieインスタンスを入れる」「終了時に、Set-Cookieを仕込む」処理を自動で行います。
 
 ### CsrfGuard.php
 

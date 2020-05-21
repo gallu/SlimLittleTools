@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools\Tests\Model;
 
@@ -201,10 +202,10 @@ class TestModelDate extends ModelBase
 
 
 // テスト本体
-class ModelTest extends \PHPUnit\Framework\TestCase
+class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
 {
     // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
         // DBハンドル用の設定をcontainerに入れておく
         $settings = [
@@ -215,29 +216,30 @@ class ModelTest extends \PHPUnit\Framework\TestCase
                     'host' => 'localhost',
                     'database' => 'slim_tools',
                     'user' => 'slim_tools',
-                    'pass' => 'XXXXXX',
+                    //'pass' => 'XXXXXX',
+                    'pass' => 'slim_tools',
                     'charset' => 'utf8mb4',
                     'options' => [\PDO::ATTR_EMULATE_PREPARES => false],
                 ],
             ],
         ];
-        $app = new \Slim\App($settings);
+        $app = static::getApp($settings);
         //
         DB::setContainer($app->getContainer());
     }
     // テストメソッドごとの開始前メソッド
-    protected function setUp()
+    protected function setUp() : void
     {
         // リアルなDB接続が必要なので、一旦スキップ
-        $this->markTestSkipped();
+        //$this->markTestSkipped();
     }
     // -----
     // テストメソッドごとの終了メソッド
-    protected function tearDown()
+    protected function tearDown() : void
     {
     }
     // 一回だけ実行される終了メソッド
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass() : void
     {
     }
 
@@ -338,7 +340,7 @@ class ModelTest extends \PHPUnit\Framework\TestCase
 
         // トランザクションの確認
         $test_model = TestModel::find(1);
-        $this->assertNotContains(' FOR UPDATE', strtoupper(TestModel::getJustBeforeQuery()));
+        $this->assertSame(strpos(strtoupper(TestModel::getJustBeforeQuery()), ' FOR UPDATE'), false );
         $this->assertSame($dbh->isTran(), false); // isTran()
         // begin
         $dbh->beginTransaction();
@@ -346,7 +348,7 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         {
             // find
             $test_model = TestModel::find(1);
-            $this->assertContains(' FOR UPDATE', strtoupper(TestModel::getJustBeforeQuery()));
+            $this->assertNotSame(strpos(strtoupper(TestModel::getJustBeforeQuery()), ' FOR UPDATE'), false );
         }
         // commit
         $dbh->commit();
@@ -388,72 +390,6 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey('common_2', $update_list);
         $this->assertArrayHasKey('update_1', $update_list);
         $this->assertArrayNotHasKey('insert_1', $update_list);
-
-        // 実際のinsert
-        // Create a mock environment for testing with
-        $environment = Environment::mock(
-            [
-                'REQUEST_METHOD' => 'GET',
-                'REQUEST_URI' => '/?mode_1_id=99&val=Val0123456789&val_guard=ValGuard0123456789',
-            ]
-        );
-        // Set up a request object based on the environment
-        $request = Request::createFromEnvironment($environment);
-        // その１
-        $obj = TestModel::insertFromRequest($request);
-        $this->assertNotSame($obj, null);
-        $this->assertSame(get_class($obj), TestModel::class);
-        $this->assertSame($obj->mode_1_id, 99);
-
-        // 実際のupdate
-        $environment = Environment::mock(
-            [
-                'REQUEST_METHOD' => 'GET',
-                'REQUEST_URI' => '/?val=valval1234',
-            ]
-        );
-        // Set up a request object based on the environment
-        $request = Request::createFromEnvironment($environment);
-        //
-        $r = $obj->updateFromRequest($request);
-        $this->assertNotSame($r, false);
-        $this->assertSame($test_model->val, 'valval1234'); //「修正項目が変わっている」事を確認
-
-        // 実際のinsert: formの名前が違うケース
-        // Create a mock environment for testing with
-        $environment = Environment::mock(
-            [
-                'REQUEST_METHOD' => 'GET',
-                'REQUEST_URI' => '/?id=999&form_val=Val0123456789&val_guard=ValGuard0123456789&dummy=123456',
-            ]
-        );
-        // Set up a request object based on the environment
-        $request = Request::createFromEnvironment($environment);
-        // その１
-        $list = TestModel::getInsertColumnsList();
-        $list['mode_1_id'] = 'id';
-        $list['val'] = 'form_val';
-        $obj = TestModel::insertFromRequest($request, $list);
-        $this->assertNotSame($obj, null);
-        $this->assertSame(get_class($obj), TestModel::class);
-        $this->assertSame($obj->mode_1_id, 999);
-
-
-        // 実際のupdate: formの名前が違うケース
-        $environment = Environment::mock(
-            [
-                'REQUEST_METHOD' => 'GET',
-                'REQUEST_URI' => '/?form_val=valval1234&dummy=123456',
-            ]
-        );
-        // Set up a request object based on the environment
-        $request = Request::createFromEnvironment($environment);
-        //
-        $list = TestModel::getUpdateColumnsList();
-        $list['val'] = 'form_val';
-        $r = $obj->updateFromRequest($request, $list);
-        $this->assertNotSame($r, false);
-        $this->assertSame($test_model->val, 'valval1234'); //「修正項目が変わっている」事を確認
 
         // order byの確認
         $dbh->query('delete from mode_1;');
@@ -543,34 +479,59 @@ class ModelTest extends \PHPUnit\Framework\TestCase
     /**
      * validateの例外
      *
-     * @expectedException \SlimLittleTools\Exception\ModelValidateException
+     * expectedException \SlimLittleTools\Exception\ModelValidateException
      */
     public function testModelValidateException()
     {
-        TestModel::insert(['val' => 'abc']);
+        //TestModel::insert(['val' => 'abc']);
+        try {
+            TestModel::insert(['val' => 'abc']);
+        } catch (\SlimLittleTools\Exception\ModelValidateException $e) {
+            $this->assertTrue(true);
+            return ;
+        }
+        // else
+        $this->assertTrue(false);
     }
 
     /**
      * updateでガード句の例外
      *
      * @depends testAll
-     * @expectedException \SlimLittleTools\Exception\ModelGuardException
+     * expectedException \SlimLittleTools\Exception\ModelGuardException
      */
     public function testModelGuardException()
     {
-        $r = TestModel::insert(['mode_1_id' => '10', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
-        $r->update(['val_guard' => 'XXXXXXXXXXXXXXXX']);
+        //$r = TestModel::insert(['mode_1_id' => '10', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        //$r->update(['val_guard' => 'XXXXXXXXXXXXXXXX']);
+        try {
+            $r = TestModel::insert(['mode_1_id' => '10', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+            $r->update(['val_guard' => 'XXXXXXXXXXXXXXXX']);
+        } catch (\SlimLittleTools\Exception\ModelGuardException $e) {
+            $this->assertTrue(true);
+            return ;
+        }
+        // else
+        $this->assertTrue(false);
     }
 
     /**
      * insertでauto_incrementの例外
      *
      * @depends testAll
-     * @expectedException \SlimLittleTools\Exception\ModelGuardException
+     * expectedException \SlimLittleTools\Exception\ModelGuardException
      */
     public function testModelGuardException2()
     {
-        $obj3 = TestModelAutoIncrement::insert(['mode_3_id' => 100, 'val' => 'test']);
+        //$obj3 = TestModelAutoIncrement::insert(['mode_3_id' => 100, 'val' => 'test']);
+        try {
+            $obj3 = TestModelAutoIncrement::insert(['mode_3_id' => 100, 'val' => 'test']);
+        } catch (\SlimLittleTools\Exception\ModelGuardException $e) {
+            $this->assertTrue(true);
+            return ;
+        }
+        // else
+        $this->assertTrue(false);
     }
 
     /**
@@ -578,20 +539,20 @@ class ModelTest extends \PHPUnit\Framework\TestCase
      *
      * expectedException \SlimLittleTools\Exception\DbException
      * @expectedException \Error
+XXXXXX
     public function testDbException()
     {
         $r = TestModel::insert(['mode_1_id' => '10', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', 'dummy' => '999']);
     }
-XXXXXX
      */
 
     /**
      * 単純なSQLのエラー例外: 存在しないテーブル
      *
      * @expectedException \SlimLittleTools\Exception\DbException
+XXXXXX
     public function testDbException2()
     {
-// XXX
         $this->assertSame('', '');
     }
      */
@@ -600,9 +561,9 @@ XXXXXX
      * 複合主キーの時にfindでstring(またはint)を指定したケース
      *
      * @expectedException \SlimLittleTools\Exception\ModelGuardException
+XXXXXX
     public function testDbException2()
     {
-// XXX
         $this->assertSame('', '');
     }
      */

@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools;
 
 use SlimLittleTools\StaticBase;
+use Psr\Container\ContainerInterface;
 
 /**
  * Slim PHP micro frameworkで「静的クラスでcontainerインスタンスを受け取る」クラス用の基底クラス
@@ -12,7 +14,7 @@ use SlimLittleTools\StaticBase;
 
 class WithStaticContainerBase extends StaticBase
 {
-    public static function setContainer($container)
+    public static function setContainer(ContainerInterface $container)
     {
         static::$container = $container;
     }

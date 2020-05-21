@@ -1,28 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools\Tests\Model;
 
 use SlimLittleTools\Model\ModelCollection;
 
-class ModelCollectionTest extends \PHPUnit\Framework\TestCase
+class ModelCollectionTest extends \SlimLittleTools\Tests\TestBase
 {
-    // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
-    {
-    }
-    // テストメソッドごとの開始前メソッド
-    protected function setUp()
-    {
-    }
-    // -----
-    // テストメソッドごとの終了メソッド
-    protected function tearDown()
-    {
-    }
-    // 一回だけ実行される終了メソッド
-    public static function tearDownAfterClass()
-    {
-    }
     // -----------------------------------------------
 
     public function testAll()

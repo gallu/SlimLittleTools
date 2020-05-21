@@ -1,13 +1,14 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools\Tests\Libs;
 
 use SlimLittleTools\Libs\Config;
 
-class ConfigTest extends \PHPUnit\Framework\TestCase
+class ConfigTest extends \SlimLittleTools\Tests\TestBase
 {
     // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
         $settings = [
             'settings' => [
@@ -20,21 +21,21 @@ class ConfigTest extends \PHPUnit\Framework\TestCase
                 ],
             ],
         ];
-        $app = new \Slim\App($settings);
-        //
+
+        $app = static::getApp($settings);
         Config::setContainer($app->getContainer());
     }
     // テストメソッドごとの開始前メソッド
-    protected function setUp()
+    protected function setUp() : void
     {
     }
     // -----
     // テストメソッドごとの終了メソッド
-    protected function tearDown()
+    protected function tearDown() : void
     {
     }
     // 一回だけ実行される終了メソッド
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass() : void
     {
     }
     // -----------------------------------------------

@@ -1,13 +1,16 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools\Tests\Libs;
 
+use SlimLittleTools\Controller\ControllerBase;
+
 use SlimLittleTools\Libs\DB;
 
-class DBTest extends \PHPUnit\Framework\TestCase
+class DBTest extends \SlimLittleTools\Tests\TestBase
 {
     // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
         $settings = [
             'settings' => [
@@ -53,21 +56,21 @@ class DBTest extends \PHPUnit\Framework\TestCase
                 ],
             ],
         ];
-        $app = new \Slim\App($settings);
-        //
+
+        $app = static::getApp($settings);
         DB::setContainer($app->getContainer());
     }
     // テストメソッドごとの開始前メソッド
-    protected function setUp()
+    protected function setUp() : void
     {
     }
     // -----
     // テストメソッドごとの終了メソッド
-    protected function tearDown()
+    protected function tearDown() : void
     {
     }
     // 一回だけ実行される終了メソッド
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass() : void
     {
     }
     // -----------------------------------------------
@@ -85,6 +88,10 @@ class DBTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($obj->options['opt1'], 1);
         $this->assertSame($obj->options['opt2'], 2);
 
+        // インスタンスが再生産されてない事の確認
+        $obj2 = DB::getHandle();
+        $this->assertSame(spl_object_hash($obj), spl_object_hash($obj2));
+
         //
         $obj = DB::getHandle('2nd');
         $this->assertSame($obj->dsn, 'mysql:host=localhost;dbname=db');
@@ -92,13 +99,13 @@ class DBTest extends \PHPUnit\Framework\TestCase
 
         $obj = DB::getHandle('3rd');
         $this->assertSame($obj->dsn, 'pgsql:host=localhost;dbname=db2');
-    }
 
-    /**
-     * @expectedException PDOException
-     */
-    public function testPdo()
-    {
-        $obj = DB::getHandle('real');
+        $flg = false;
+        try {
+            $obj = DB::getHandle('real');
+        } catch (\PDOException $e) {
+            $flg = true;
+        }
+        $this->assertTrue($flg);
     }
 }

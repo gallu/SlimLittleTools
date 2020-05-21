@@ -1,10 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools\Libs\Http;
 
 use SlimLittleTools\Libs\Security;
 
-class Cookies extends \Slim\Http\Cookies
+class Cookies extends \Slim\Psr7\Cookies
 {
     /**
      *
@@ -16,31 +17,18 @@ class Cookies extends \Slim\Http\Cookies
 
     /**
      * 「１つだけパラメタを変えたい」ような時用
-     */
-    public function set($name, $value, $settings = null)
+     *
+     * XXX 「一時的に設定を変えたい」時は、valueを配列にして ['value' => 値, ...設定値] にすればよいみたい、なので、本継承は廃止
+    public function set(string $name, $value) : \Slim\Psr7\Cookies
     {
-        // settingsの指定がなかったらそのまま親メソッドの処理
-        if (null === $settings) {
-            return parent::set($name, $value);
-        }
-        // else
-        // 一旦、現在の設定を退避
-        $bak_defaults = $this->defaults;
-        // defaultを変更
-        $this->setDefaults($settings);
-        // 親メソッドをcall
-        $r = parent::set($name, $value);
-        // defaultをもとに戻す
-        $this->defaults = $bak_defaults;
-        // 復帰
-        return $r;
     }
+     */
 
     /**
      * 概ねラッパー
      */
     public function delete($name)
     {
-        $this->set($name, '', ['httponly' => true, 'expires' => date(DATE_COOKIE, 1) ]);
+        $this->set($name, ['value' => '', 'httponly' => true, 'expires' => date(DATE_COOKIE, 1) ]);
     }
 }

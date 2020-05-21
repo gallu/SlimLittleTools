@@ -1,47 +1,26 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools\Tests\Middleware;
 
 use SlimLittleTools\Middleware\AddHeader;
 use SlimLittleTools\Libs\Http\Request;
 //
-use Slim\Http\Environment;
-use Slim\Http\Response;
+use Slim\Psr7\Response;
 
-class AddHeaderTest extends \PHPUnit\Framework\TestCase
+class AddHeaderTest extends \SlimLittleTools\Tests\TestBase
 {
-    // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
-    {
-    }
     // テストメソッドごとの開始前メソッド
-    protected function setUp()
+    protected function setUp() : void
     {
+        // 一端スキップ
+        $this->markTestSkipped();
     }
-    // -----
-    // テストメソッドごとの終了メソッド
-    protected function tearDown()
-    {
-    }
-    // 一回だけ実行される終了メソッド
-    public static function tearDownAfterClass()
-    {
-    }
-    // -----------------------------------------------
 
+
+    // -----------------------------------------------
     public function testAddHeader()
     {
-        // Create a mock environment for testing with
-        $environment = Environment::mock(
-            [
-                'REQUEST_METHOD' => 'GET',
-                'REQUEST_URI' => '/',
-            ]
-        );
-
-        // Set up a request object based on the environment
-        $request = Request::createFromEnvironment($environment);
-
         // Set up a response object
         $response = new Response();
 
@@ -54,13 +33,6 @@ class AddHeaderTest extends \PHPUnit\Framework\TestCase
             ],
         ];
 
-        // Instantiate the application
-        $app = new \Slim\App($settings);
-
-        // Set up dependencies
-
-        // Register middleware
-        $app->add(new AddHeader($app->getContainer()));
 
         // Register routes
         $app->get('/', function (Request $request, Response $response, array $args) {

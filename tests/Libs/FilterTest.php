@@ -1,28 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools\Tests\Libs;
 
 use SlimLittleTools\Libs\Filter;
 
-class FilterTest extends \PHPUnit\Framework\TestCase
+class FilterTest extends \SlimLittleTools\Tests\TestBase
 {
-    // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
-    {
-    }
-    // テストメソッドごとの開始前メソッド
-    protected function setUp()
-    {
-    }
-    // -----
-    // テストメソッドごとの終了メソッド
-    protected function tearDown()
-    {
-    }
-    // 一回だけ実行される終了メソッド
-    public static function tearDownAfterClass()
-    {
-    }
     // -----------------------------------------------
 
     public function testFilter()
@@ -120,11 +104,19 @@ class FilterTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @expectedException ErrorException
+     * expectedException ErrorException
      */
     public function testNoRule()
     {
-        $data = Filter::exec(['test' => '1'], ['test' => 'int|string|hoge']);
+        //$data = Filter::exec(['test' => '1'], ['test' => 'int|string|hoge']);
+        try {
+            $data = Filter::exec(['test' => '1'], ['test' => 'int|string|hoge']);
+        } catch (\ErrorException $e) {
+            $this->assertTrue(true);
+            return ;
+        }
+        // else
+        $this->assertTrue(false);
     }
 
     //
