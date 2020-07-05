@@ -530,7 +530,18 @@ class ModelBase
             list($cols, $vals, $p_data) = static::makeSqlParts($where);
             $where = [];
             for ($i = 0; $i < count($cols); ++$i) {
-                $where[] = "{$cols[$i]} = {$vals[$i]}";
+                // 実数値が配列で送られてきた場合INで組み立てる
+                if(is_array($p_data[$vals[$i]])){
+                    $tmp = [];
+                    for($c=0; $c<count($p_data[$vals[$i]]); $c++){
+                        $tmp[] = $vals[$i]. "_". $c;
+                        $p_data[$vals[$i]. "_". $c] = $p_data[$vals[$i]][$c];
+                    }
+                    unset($p_data[$vals[$i]]);
+                    $where[] = "{$cols[$i]} in (". join(" , ", $tmp). ")";
+                }else{
+                    $where[] = "{$cols[$i]} = {$vals[$i]}";
+                }
             }
         } else {
             // 下で使うので宣言だけしておく
