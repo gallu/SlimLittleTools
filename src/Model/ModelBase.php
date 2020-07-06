@@ -532,10 +532,11 @@ class ModelBase
             for ($i = 0; $i < count($cols); ++$i) {
                 // 実数値が配列で送られてきた場合INで組み立てる
                 if(is_array($p_data[$vals[$i]])){
+                    $awk = array_values($p_data[$vals[$i]]);
                     $tmp = [];
-                    for($c=0; $c<count($p_data[$vals[$i]]); $c++){
+                    for($c=0; $c < count($awk); $c++){
                         $tmp[] = $vals[$i]. "_". $c;
-                        $p_data[$vals[$i]. "_". $c] = $p_data[$vals[$i]][$c];
+                        $p_data[$vals[$i]. "_". $c] = $awk[$c];
                     }
                     unset($p_data[$vals[$i]]);
                     $where[] = "{$cols[$i]} in (". join(" , ", $tmp). ")";
