@@ -216,8 +216,7 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
                     'host' => 'localhost',
                     'database' => 'slim_tools',
                     'user' => 'slim_tools',
-                    //'pass' => 'XXXXXX',
-                    'pass' => 'slim_tools',
+                    'pass' => 'XXXXXX',
                     'charset' => 'utf8mb4',
                     'options' => [\PDO::ATTR_EMULATE_PREPARES => false],
                 ],
@@ -231,7 +230,7 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
     protected function setUp() : void
     {
         // リアルなDB接続が必要なので、一旦スキップ
-        //$this->markTestSkipped();
+        $this->markTestSkipped();
     }
     // -----
     // テストメソッドごとの終了メソッド
@@ -470,6 +469,20 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
         $obj = TestModelDate::find($id);
         $this->assertSame($obj->date_1, null);
         $this->assertSame($obj->date_2, null);
+
+
+        // 「INでの取得」のテスト
+        $dbh->query('TRUNCATE TABLE mode_1;');
+        $r = TestModel::insert(['mode_1_id' => '1', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        $r = TestModel::insert(['mode_1_id' => '2', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        $r = TestModel::insert(['mode_1_id' => '3', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        $r = TestModel::insert(['mode_1_id' => '4', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        $r = TestModel::insert(['mode_1_id' => '5', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        // XXX 順番が保証されているわけじゃないから、テスト的には微妙だけどねぇ……
+        $data = TestModel::findByAll(['mode_1_id' => [2,3,4]]);
+        $this->assertSame($data[0]->mode_1_id, 2);
+        $this->assertSame($data[1]->mode_1_id, 3);
+        $this->assertSame($data[2]->mode_1_id, 4);
 
     }
 
