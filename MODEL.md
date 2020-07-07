@@ -244,6 +244,13 @@ $modelCollectionObj = ModelClass::findByAll(['no_key1' => 1, 'no_key2' = 2], '�
 * 上述は、組み合わせる事ができます(例: 'col_1, col_2 DESC')
 
 
+findByAll で値に配列を指定するとINで取ってくるようになりました(>= 1.0.2)
+```
+$modelCollectionObj = ModelClass::findByAll(['no_key1' => [1, 2, 3]]);
+$modelCollectionObj = ModelClass::findByAll(['no_key1' => [1, 2, 3]], 'ソートカラム名');
+```
+
+
 ## 削除
 
 削除は「インスタンスの中にある主キーを削除」します。
