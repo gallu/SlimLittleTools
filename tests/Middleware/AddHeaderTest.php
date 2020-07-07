@@ -10,6 +10,7 @@ use Slim\Http\Response;
 
 class AddHeaderTest extends \PHPUnit\Framework\TestCase
 {
+/*
     // 一回だけ実行される開始前メソッド
     public static function setUpBeforeClass()
     {
@@ -27,6 +28,7 @@ class AddHeaderTest extends \PHPUnit\Framework\TestCase
     public static function tearDownAfterClass()
     {
     }
+*/
     // -----------------------------------------------
 
     public function testAddHeader()

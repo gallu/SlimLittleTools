@@ -7,7 +7,7 @@ use SlimLittleTools\Libs\Config;
 class ConfigTest extends \PHPUnit\Framework\TestCase
 {
     // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
         $settings = [
             'settings' => [
@@ -24,6 +24,7 @@ class ConfigTest extends \PHPUnit\Framework\TestCase
         //
         Config::setContainer($app->getContainer());
     }
+/*
     // テストメソッドごとの開始前メソッド
     protected function setUp()
     {
@@ -37,6 +38,7 @@ class ConfigTest extends \PHPUnit\Framework\TestCase
     public static function tearDownAfterClass()
     {
     }
+*/
     // -----------------------------------------------
 
     public function testGet()

@@ -7,7 +7,7 @@ use SlimLittleTools\Libs\DB;
 class DBTest extends \PHPUnit\Framework\TestCase
 {
     // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
         $settings = [
             'settings' => [
@@ -57,19 +57,6 @@ class DBTest extends \PHPUnit\Framework\TestCase
         //
         DB::setContainer($app->getContainer());
     }
-    // テストメソッドごとの開始前メソッド
-    protected function setUp()
-    {
-    }
-    // -----
-    // テストメソッドごとの終了メソッド
-    protected function tearDown()
-    {
-    }
-    // 一回だけ実行される終了メソッド
-    public static function tearDownAfterClass()
-    {
-    }
     // -----------------------------------------------
 
     public function testGetHandle()
@@ -92,13 +79,14 @@ class DBTest extends \PHPUnit\Framework\TestCase
 
         $obj = DB::getHandle('3rd');
         $this->assertSame($obj->dsn, 'pgsql:host=localhost;dbname=db2');
+
+        $flg = false;
+        try {
+            $obj = DB::getHandle('real');
+        } catch (\PDOException $e) {
+            $flg = true;
+        }
+        $this->assertTrue($flg);
     }
 
-    /**
-     * @expectedException PDOException
-     */
-    public function testPdo()
-    {
-        $obj = DB::getHandle('real');
-    }
 }

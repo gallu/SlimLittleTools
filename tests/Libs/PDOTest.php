@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SlimLittleTools\Tests\Libs;
 
@@ -6,32 +7,13 @@ use SlimLittleTools\Libs\PDO;
 
 class PDOTest extends \PHPUnit\Framework\TestCase
 {
-    // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
-    {
-    }
-    // テストメソッドごとの開始前メソッド
-    protected function setUp()
-    {
-        // リアルなDB接続が必要なので、一旦スキップ
-        $this->markTestSkipped();
-    }
-    // -----
-    // テストメソッドごとの終了メソッド
-    protected function tearDown()
-    {
-    }
-    // 一回だけ実行される終了メソッド
-    public static function tearDownAfterClass()
-    {
-    }
     // -----------------------------------------------
     public function getDbHandle()
     {
         static $dbh = null;
         if (null === $dbh) {
             // XXX
-            $dbh = new PDO('mysql:dbname=slim_tools;host=localhost', 'slim_tools', 'XXXXXX');
+            $dbh = new PDO('mysql:dbname=slim_tools;host=localhost', 'slim_tools', 'slim_tools');
         }
         return $dbh;
     }
@@ -99,13 +81,21 @@ INSERT INTO prepared_query_test(prepared_query_test_id, val, val2) VALUES(4, '4_
 
 
     /**
-     * 複合主キーの時にfindでstring(またはint)を指定したケース
+     * サポート外のRDB
      *
-     * @expectedException \SlimLittleTools\Exception\DbException
+     * expectedException \SlimLittleTools\Exception\DbException
      */
     public function testNotSupported()
     {
-        $dbh = new PDO('oracle:dbname=slim_tools;host=localhost', 'slim_tools', 'XXXXXX');
+        //$dbh = new PDO('oracle:dbname=slim_tools;host=localhost', 'slim_tools', 'XXXXXX');
+        try {
+            $dbh = new PDO('oracle:dbname=slim_tools;host=localhost', 'slim_tools', 'XXXXXX');
+        } catch (\SlimLittleTools\Exception\DbException $e) {
+            $this->assertTrue(true);
+            return ;
+        }
+        //
+        $this->assertTrue(false);
     }
 
     /**
@@ -115,7 +105,16 @@ INSERT INTO prepared_query_test(prepared_query_test_id, val, val2) VALUES(4, '4_
      */
     public function testInvalidIdentifier()
     {
-        $dbh = $this->getDbHandle();
-        $dbh->escapeIdentifier('abc-de');
+        //$dbh = $this->getDbHandle();
+        //$dbh->escapeIdentifier('abc-de');
+        try  {
+            $dbh = $this->getDbHandle();
+            $dbh->escapeIdentifier('abc-de');
+        } catch (\SlimLittleTools\Exception\DbException $e) {
+            $this->assertTrue(true);
+            return ;
+        }
+        //
+        $this->assertTrue(false);
     }
 }

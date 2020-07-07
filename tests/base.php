@@ -4,6 +4,7 @@
 
 class HogeTest extends \PHPUnit\Framework\TestCase
 {
+/*
     // 一回だけ実行される開始前メソッド
     public static function setUpBeforeClass()
     {
@@ -21,6 +22,7 @@ class HogeTest extends \PHPUnit\Framework\TestCase
     public static function tearDownAfterClass()
     {
     }
+*/
     // -----------------------------------------------
 
     public function testHoge()

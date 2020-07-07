@@ -6,6 +6,7 @@ use SlimLittleTools\Libs\Validator;
 
 class ValidatorTest extends \PHPUnit\Framework\TestCase
 {
+/*
     // 一回だけ実行される開始前メソッド
     public static function setUpBeforeClass()
     {
@@ -23,6 +24,7 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
     public static function tearDownAfterClass()
     {
     }
+*/
     // -----------------------------------------------
 
     public function testMono()

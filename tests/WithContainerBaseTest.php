@@ -5,6 +5,7 @@ use Slim\Collection;
 
 class WithContainerBaseTest extends \PHPUnit\Framework\TestCase
 {
+/*
     // 一回だけ実行される開始前メソッド
     public static function setUpBeforeClass()
     {
@@ -22,6 +23,7 @@ class WithContainerBaseTest extends \PHPUnit\Framework\TestCase
     public static function tearDownAfterClass()
     {
     }
+*/
     // -----------------------------------------------
 
     //

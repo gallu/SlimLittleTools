@@ -10,7 +10,7 @@ class ContainerTestHoge {
 class ContainerTest extends \PHPUnit\Framework\TestCase
 {
     // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
         $settings = [
             'settings' => [
@@ -32,6 +32,7 @@ class ContainerTest extends \PHPUnit\Framework\TestCase
             return $obj;
         };
     }
+/*
     // テストメソッドごとの開始前メソッド
     protected function setUp()
     {
@@ -45,6 +46,7 @@ class ContainerTest extends \PHPUnit\Framework\TestCase
     public static function tearDownAfterClass()
     {
     }
+*/
     // -----------------------------------------------
 
     public function testAny()

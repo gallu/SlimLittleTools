@@ -204,7 +204,7 @@ class TestModelDate extends ModelBase
 class ModelTest extends \PHPUnit\Framework\TestCase
 {
     // 一回だけ実行される開始前メソッド
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
         // DBハンドル用の設定をcontainerに入れておく
         $settings = [
@@ -226,18 +226,18 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         DB::setContainer($app->getContainer());
     }
     // テストメソッドごとの開始前メソッド
-    protected function setUp()
+    protected function setUp() : void
     {
         // リアルなDB接続が必要なので、一旦スキップ
         $this->markTestSkipped();
     }
     // -----
     // テストメソッドごとの終了メソッド
-    protected function tearDown()
+    protected function tearDown() : void
     {
     }
     // 一回だけ実行される終了メソッド
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass() : void
     {
     }
 
@@ -338,7 +338,7 @@ class ModelTest extends \PHPUnit\Framework\TestCase
 
         // トランザクションの確認
         $test_model = TestModel::find(1);
-        $this->assertNotContains(' FOR UPDATE', strtoupper(TestModel::getJustBeforeQuery()));
+        $this->assertSame(strpos(strtoupper(TestModel::getJustBeforeQuery()), ' FOR UPDATE'), false );
         $this->assertSame($dbh->isTran(), false); // isTran()
         // begin
         $dbh->beginTransaction();
@@ -346,7 +346,7 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         {
             // find
             $test_model = TestModel::find(1);
-            $this->assertContains(' FOR UPDATE', strtoupper(TestModel::getJustBeforeQuery()));
+            $this->assertNotSame(strpos(strtoupper(TestModel::getJustBeforeQuery()), ' FOR UPDATE'), false );
         }
         // commit
         $dbh->commit();
@@ -535,6 +535,19 @@ class ModelTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($obj->date_1, null);
         $this->assertSame($obj->date_2, null);
 
+        // 「INでの取得」のテスト
+        $dbh->query('TRUNCATE TABLE mode_1;');
+        $r = TestModel::insert(['mode_1_id' => '1', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        $r = TestModel::insert(['mode_1_id' => '2', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        $r = TestModel::insert(['mode_1_id' => '3', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        $r = TestModel::insert(['mode_1_id' => '4', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        $r = TestModel::insert(['mode_1_id' => '5', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        // XXX 順番が保証されているわけじゃないから、テスト的には微妙だけどねぇ……
+        $data = TestModel::findByAll(['mode_1_id' => [2,3,4]]);
+        $this->assertSame($data[0]->mode_1_id, 2);
+        $this->assertSame($data[1]->mode_1_id, 3);
+        $this->assertSame($data[2]->mode_1_id, 4);
+
     }
 
     // 違うDBハンドルを使うクラスの確認
@@ -543,34 +556,59 @@ class ModelTest extends \PHPUnit\Framework\TestCase
     /**
      * validateの例外
      *
-     * @expectedException \SlimLittleTools\Exception\ModelValidateException
+     * expectedException \SlimLittleTools\Exception\ModelValidateException
      */
     public function testModelValidateException()
     {
-        TestModel::insert(['val' => 'abc']);
+        //TestModel::insert(['val' => 'abc']);
+        try {
+            TestModel::insert(['val' => 'abc']);
+        } catch (\SlimLittleTools\Exception\ModelValidateException $e) {
+            $this->assertTrue(true);
+            return ;
+        }
+        // else
+        $this->assertTrue(false);
     }
 
-    /**
+   /**
      * updateでガード句の例外
      *
      * @depends testAll
-     * @expectedException \SlimLittleTools\Exception\ModelGuardException
+     * expectedException \SlimLittleTools\Exception\ModelGuardException
      */
     public function testModelGuardException()
     {
-        $r = TestModel::insert(['mode_1_id' => '10', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
-        $r->update(['val_guard' => 'XXXXXXXXXXXXXXXX']);
+        //$r = TestModel::insert(['mode_1_id' => '10', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        //$r->update(['val_guard' => 'XXXXXXXXXXXXXXXX']);
+        try {
+            $r = TestModel::insert(['mode_1_id' => '10', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+            $r->update(['val_guard' => 'XXXXXXXXXXXXXXXX']);
+        } catch (\SlimLittleTools\Exception\ModelGuardException $e) {
+            $this->assertTrue(true);
+            return ;
+        }
+        // else
+        $this->assertTrue(false);
     }
 
     /**
      * insertでauto_incrementの例外
      *
      * @depends testAll
-     * @expectedException \SlimLittleTools\Exception\ModelGuardException
+     * expectedException \SlimLittleTools\Exception\ModelGuardException
      */
     public function testModelGuardException2()
     {
-        $obj3 = TestModelAutoIncrement::insert(['mode_3_id' => 100, 'val' => 'test']);
+        //$obj3 = TestModelAutoIncrement::insert(['mode_3_id' => 100, 'val' => 'test']);
+        try {
+            $obj3 = TestModelAutoIncrement::insert(['mode_3_id' => 100, 'val' => 'test']);
+        } catch (\SlimLittleTools\Exception\ModelGuardException $e) {
+            $this->assertTrue(true);
+            return ;
+        }
+        // else
+        $this->assertTrue(false);
     }
 
     /**

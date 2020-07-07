@@ -7,6 +7,7 @@ use Slim\Collection;
 
 class ControllerBaseTest extends \PHPUnit\Framework\TestCase
 {
+/*
     // 一回だけ実行される開始前メソッド
     public static function setUpBeforeClass()
     {
@@ -25,6 +26,7 @@ class ControllerBaseTest extends \PHPUnit\Framework\TestCase
     {
     }
     // -----------------------------------------------
+*/
 
     //
     public function testCreateInstance()
