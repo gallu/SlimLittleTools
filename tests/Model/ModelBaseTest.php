@@ -144,7 +144,7 @@ class TestModelAddRule extends ModelBase
     protected $table = 'mode_no_exist';
 
     // insertとupdateで共通の「追加validate処理」用の空メソッド
-    protected static function validateAdditionalRule(\SlimLittleTools\Libs\Validator $res)
+    protected static function validateAdditionalRule(\SlimLittleTools\Libs\Validator $res, ?ModelBase $model = null)
     {
         $res->setResultFalse();
         $res->addError(['TestModelAddRule' => ['hoge']]);
@@ -200,6 +200,77 @@ class TestModelDate extends ModelBase
 
 }
 
+// finalDataAdjustment テスト用モデル
+class TestModelDataAdjustment extends ModelBase
+{
+    protected $table = 'mode_1';
+    protected $pk = 'mode_1_id';
+
+    // テスト用
+    public static function setTestObject($obj)
+    {
+        static::$test = $obj;
+    }
+
+    //
+    protected static function finalDataAdjustment(array $data, string $type, ?ModelBase $model = null)
+    {
+        //
+        if ('insert' === $type) {
+            static::$test->assertSame($model, null);
+        } else if ('update' === $type) {
+            static::$test->assertSame(is_object($model), true);
+            static::$test->assertSame(get_class($model), TestModelDataAdjustment::class);
+        } else {
+            static::$test->assertTrue(false);
+        }
+        //
+        static::$test->assertSame(isset($data['dummy']), true);
+        unset($data['dummy']);
+        static::$test->assertSame(isset($data['dummy']), false);
+
+        //
+        return $data;
+    }
+
+private static $test;
+}
+// getProperty テスト用
+class TestGetProperty extends ModelBase
+{
+    protected $test_string = 'before';
+
+    // テスト用
+    public static function setTestObject($obj)
+    {
+        static::$test = $obj;
+    }
+
+    public function changeProperty()
+    {
+        // 前提になるテスト
+        static::$test->assertSame(static::getProperty('test_string', null, $this), 'before');
+        // プロパティの変更
+        $this->test_string = 'after';
+        // テスト
+        static::$test->assertSame(static::getProperty('test_string', null, $this), 'after');
+    }
+
+private static $test;
+}
+
+// テスト用モデル
+class TestSuppressToArray extends ModelBase
+{
+    protected $table = 'mode_1';
+    protected $pk = 'mode_1_id';
+
+    protected $created_at = 'created_at';
+    protected $updated_at = 'updated_at';
+
+    protected $suppressToArray = ['created_at', 'val2'];
+
+}
 
 // テスト本体
 class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
@@ -275,7 +346,15 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
         $this->assertNotSame($r, null);
         $this->assertSame(get_class($r), TestModel::class);
         $this->assertSame($r->mode_1_id, 1);
-        $this->assertSame($r->hoge, null); // 存在しないカラム名のチェック
+
+        // 存在しないカラム名のチェック
+        $flg = false;
+        try {
+            $this->assertSame($r->hoge, null);
+        } catch (\Throwable $e) {
+            $flg = true;
+        }
+        $this->assertTrue($flg);
 
         // 重複によるエラー
         $r = TestModel::insert(['mode_1_id' => '1', 'val' => 'XXXXXXXXXXXXX', 'val_guard' => 'XXXXXXXXXXXXxxxxxx', ]);
@@ -292,6 +371,7 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
         $this->assertSame($test_model->val, 'Val0123456789'); //「修正項目が変わっている」前を確認
         $r = $test_model->update(['val' => 'valval1234', 'val_guard' => 'valguard0123456789']);
         $this->assertNotSame($r, false);
+        $this->assertSame($r, true);
         $this->assertSame($test_model->val, 'valval1234'); //「修正項目が変わっている」事を確認
 
         // 省略付きのupdate
@@ -455,6 +535,7 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
         $obj = TestModelDate::insert(['s' => 'abc', 'date_1' => '', 'date_2' => '']);
         $id = $obj->mode_date_id;
         $obj = TestModelDate::find($id);
+        // null文字が適切にget出来る事を確認
         $this->assertSame($obj->date_1, null);
         $this->assertSame($obj->date_2, null);
 
@@ -484,6 +565,43 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
         $this->assertSame($data[1]->mode_1_id, 3);
         $this->assertSame($data[2]->mode_1_id, 4);
 
+        // unlockGuard のテスト
+        $model = TestModel::insert(['mode_1_id' => '999', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', ]);
+        $this->assertSame($model->val_guard, 'valguard0123456789');
+        $model->unlockGuard(['val_guard']);
+        $r = $model->update(['val_guard' => 'ValGuard9876543210']);
+        $this->assertSame($r, true);
+        //
+        $model = TestModel::find('999');
+        $this->assertSame($model->val_guard, 'valguard9876543210');
+        $model->delete();
+
+        // finalDataAdjustment テスト
+        TestModelDataAdjustment::setTestObject($this);
+        $model = TestModelDataAdjustment::insert(['mode_1_id' => '123', 'val' => 'Val0123456789', 'val_guard' => 'ValGuard0123456789', 'dummy' => 10]);
+        $r = $model->update(['val' => 'Val9999999999', 'dummy' => 10]);
+        $this->assertSame($r, true);
+        $model->delete();
+
+        // プロパティを変えた時用のテスト
+        TestGetProperty::setTestObject($this);
+        (new TestGetProperty())->changeProperty();
+
+        // suppressToArray のテスト
+        $model = TestSuppressToArray::insert(['mode_1_id' => '123', 'val' => 'Val0123456789', 'val2' => '22222', 'val_guard' => 'ValGuard0123456789']);
+        $this->assertNotSame($model, null);
+        $awk = $model->toArray();
+        $this->assertSame($awk['mode_1_id'], '123');
+        $this->assertSame(isset($awk['created_at']), false);
+        $this->assertNotSame($model->created_at, '');
+        //
+        $model = TestSuppressToArray::find('123');
+        $this->assertNotSame($model, null);
+        $this->assertSame($awk['mode_1_id'], '123');
+        $this->assertSame(isset($awk['val2']), false);
+        $this->assertSame($model->val2, '22222');
+        //
+        $model->delete();
     }
 
     // 違うDBハンドルを使うクラスの確認

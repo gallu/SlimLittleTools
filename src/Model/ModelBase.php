@@ -128,8 +128,13 @@ class ModelBase
         $res->addError(['test' => ['hoge'], 'test2' => ['foo']]);
 
      */
-    // insertとupdateで共通の「追加validate処理」用の空メソッド
-    protected static function validateAdditionalRule(\SlimLittleTools\Libs\Validator $res)
+    /**
+     * insertとupdateで共通の「追加validate処理」用の空メソッド
+     *
+     * @param \SlimLittleTools\Libs\Validator $res validatorインスタンス
+     * @param ?ModelBase $model update経由で呼ばれた時は$this、insert経由で呼ばれた時はnull
+     */
+    protected static function validateAdditionalRule(\SlimLittleTools\Libs\Validator $res, ?ModelBase $model = null)
     {
     }
 
@@ -169,6 +174,34 @@ class ModelBase
         return $data;
     }
 
+    /**
+     * insert/update直前のデータの最終的な整形
+     *
+     * XXX メソッドを上書きして、適当な処理が入る事を想定
+     *
+     * @param array $data insertまたはupdateしようとしている情報
+     * @param string $type 'insert'または'update'
+     * @param ?ModelBase $model insertならnull, updateなら、call元の$this
+     * @return array 整形後のデータ
+     */
+    protected static function finalDataAdjustment(array $data, string $type, ?ModelBase $model = null)
+    {
+        //
+        return $data;
+    }
+
+    /**
+     * update時の、一時的なgurdの解除
+     *
+     * ここで渡されたカラムは、当該インスタンスにおいて一時的にgurdから免除される
+     *
+     * @param array $cols 一時的にunlock(解除)するカラム名の配列
+     */
+    public function unlockGuard(array $cols)
+    {
+        // XXX 細かいエラーチェックは一端オミット。後で必要そうなら追加する
+        $this->unlock_guard = $cols;
+    }
 
     //
     public static function insertValidate($data)
@@ -212,25 +245,25 @@ class ModelBase
     }
 
     //
-    public static function updateValidate($data)
+    public function updateValidate($data)
     {
         // ルールを把握
-        $rules = static::getProperty('validate_update', []) + static::getProperty('validate', []);
+        $rules = static::getProperty('validate_update', [], $this) + static::getProperty('validate', [], $this);
 
         // 標準のvalidate
         $c = static::$validate_class;
         $res = $c::validate($data, $rules, true);
 
         // 追加ルールの処理
-        static::validateAdditionalRule($res);
+        static::validateAdditionalRule($res, $this);
 
         //
         return $res;
     }
-    public static function updateFilter($data)
+    public function updateFilter($data)
     {
         // ルールを把握
-        $rules = static::getProperty('filter_update', []) + static::getProperty('filter', []);
+        $rules = static::getProperty('filter_update', [], $this) + static::getProperty('filter', [], $this);
 
         // filterを実行
         $c = static::$filter_class;
@@ -346,22 +379,18 @@ class ModelBase
     /**
      * staticなメソッドから「固定値のプロパティ」を見るためのラッパー
      */
-    protected static function getProperty($key, $default = null)
+    protected static function getProperty($key, $default = null, $class = null)
     {
-        //
-        static $selfs = [];
-
-        //
-        $class = get_called_class();
-        if (false === isset($selfs[$class])) {
-            // プロパティ使いたいからインスタンス作成
-            $selfs[$class] = new static ;
+        // プロパティ使いたいからインスタンス作成
+        if (null === $class) {
+            $class = new static ;
         }
 
-        //
-        if (isset($selfs[$class]->$key)) {
-            return $selfs[$class]->$key;
+        // あったらその値を返す
+        if (isset($class->$key)) {
+            return $class->$key;
         }
+
         // else
         return $default;
     }
@@ -407,6 +436,9 @@ class ModelBase
         if (true === static::isDateEmptyStringToNull()) {
             $data = static::deleteEmptyDates($data);
         }
+
+        // 最終的なデータの整形
+        $data = static::finalDataAdjustment($data, 'insert');
 
         // insert用パーツ
         list($cols, $vals, $p_data) = static::makeSqlParts($data);
@@ -614,8 +646,10 @@ class ModelBase
         foreach ($guard as $k) {
             //
             if ((isset($data[$k]))&&($data[$k] !== $this->get($k))) {
-                //var_dump($data[$k], $this->get($k) );
-                throw new ModelGuardException("guardによってガードされた値は変更できません({$k})");
+                if (false === in_array($k, $this->unlock_guard, true)) {
+                    //var_dump($data[$k], $this->get($k) );
+                    throw new ModelGuardException("guardによってガードされた値は変更できません({$k})");
+                }
             }
         }
 
@@ -623,10 +657,10 @@ class ModelBase
         $data = static::setUpdatedAt($data);
 
         // フィルター
-        $data = static::updateFilter($data);
+        $data = $this->updateFilter($data);
 
         // validate
-        $res = static::updateValidate($data);
+        $res = $this->updateValidate($data);
         if (false === $res->isValid()) {
             throw (new ModelValidateException())->setErrorObj($res->getError());
         }
@@ -643,6 +677,9 @@ class ModelBase
         if (true === static::isDateEmptyStringToNull()) {
             $data = static::deleteEmptyDates($data);
         }
+
+        // 最終的なデータの整形
+        $data = static::finalDataAdjustment($data, 'update', $this);
 
         // update用パーツ
         list($cols, $vals, $p_data) = static::makeSqlParts($data);
@@ -756,11 +793,28 @@ class ModelBase
 
 
     /**
+     * 全データ取得
      *
+     * 基本「表示用」。$suppressToArray で「出力抑止」が出来る
      */
     public function toArray()
     {
-        return $this->data;
+        // 抑止情報の取得
+        $suppressToArray = static::getProperty('suppressToArray', [], $this);
+        // 抑止がないパターンのほうが多そうなので、これだけ先に処理しておく
+        if ([] === $suppressToArray) {
+            return $this->data;
+        }
+        // 抑止されていない項目だけ抜き出す
+        $ret = [];
+        $suppressToArray = array_flip($suppressToArray);
+        foreach($this->data as $k => $v) {
+            if (false === isset($suppressToArray[$k])) {
+                $ret[$k] = $v;
+            }
+        }
+        //
+        return $ret;
     }
 
     /**
@@ -780,7 +834,7 @@ class ModelBase
 
     /**
      *
-     * @return int|string|null 存在しないキーはnull
+     * @return int|string|null 存在しないキーは 例外( \ErrorException )
      */
     public function __get($name)
     {
@@ -788,15 +842,15 @@ class ModelBase
     }
     /**
      *
-     * @return int|string|null 存在しないキーはnull
+     * @return int|string|null 存在しないキーは 例外( \ErrorException )
      */
     public function get($name)
     {
-        if (isset($this->data[$name])) {
+        if (array_key_exists($name, $this->data)) {
             return $this->data[$name];
         }
         // else
-        return null;
+        throw new  \ErrorException("存在しないkey {$name} をgetしようとしました。");
     }
 
     /**
@@ -832,4 +886,6 @@ class ModelBase
     private $data = [];
     private $changed_data = [];
     protected static $just_before_query = '';
+    //
+    private $unlock_guard = [];
 }
