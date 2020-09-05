@@ -23,6 +23,9 @@
     // (PK以外で)update時に変更を抑止したいカラム：このカラムがupdate時に「引数で入っていて」「既存の値と異なる」場合は、例外を吐く
     protected $guard = ['name', 'name', ...];
 
+    // toArray() で「配列として出力しないカラム」を指定します
+    protected $suppressToArray = ['name', 'name', ...];
+
     // いわゆるcreated_at / updated_atがあるとき、ここに指定があればそのカラム名に日付を追加で入れる
     // booleanでtrueが入っている場合は、デフォルトの文字列を使う(created_at/updated_at)
     protected $created_at = 'created_at'; // insert時のみ
@@ -123,6 +126,16 @@ if (null === $modelObj) {
 
 ```
 
+例えば「パスワードは、hashしてからDBに入れたい」などのデータ加工については、    
+```
+protected static function finalDataAdjustment(array $data, string $type, ?ModelBase $model = null)
+```
+メソッドを使ってください。    
+insert時は、$typeに'insert'が入ってきます。    
+この処理は「filter、validateが終わって、最終的にINSERTのSQL文を作る直前」になります。    
+$dataに「insertで対象にしようとしているデータの配列」が入ってくるので、適宜加工をしてから、加工後の配列をreturnすると、「returnした配列を使ってINSERT文が作られる」ようになります。    
+
+
 ## update
 
 updateに固有は指定は以下の通りです。
@@ -194,12 +207,33 @@ if (false === $r) {
 
 ```
 
+例えば「パスワードは、hashしてからDBに入れたい」などのデータ加工については、    
+```
+protected static function finalDataAdjustment(array $data, string $type, ?ModelBase $model = null)
+```
+メソッドを使ってください。    
+update時は、$typeに'update'が入ってきます。また、$modelには$thisが入ってきます。    
+この処理は「filter、validateが終わって、最終的にUPDATEのSQL文を作る直前」になります。    
+$dataに「updateで対象にしようとしているデータの配列」が入ってくるので、適宜加工をしてから、加工後の配列をreturnすると、「returnした配列を使ってUPDATE文が作られる」ようになります。    
+
+$guard句を「一時的に外したいケース(例えばパスワード: 普段はガードしたいが、「特定の遷移から」の時だけはパスワードを変更したい)」というようなケースがある時は、unlockGuard() メソッドを使ってください。    
+例:
+````
+$model = HogeModel::find(xxx);
+$model->unlockGuard(['password']); // 一時的にpasswordのガードを解除
+$r = $model->update(['password' => $raw_password]);
+$model->unlockGuard([]); // 「一時的なガード解除」を戻す(ガードを有効にする)
+````
+
+
 ## インスタンスのデータのset/get
 
 メソッドとしてget()があります。また __get() を定義しているので「$obj->カラム名」でも取得できます。    
 set()メソッドはprotectedなので、基本的に外部には公開していません。インスタンスのデータを変更したい時は、updateメソッドをcallして「DBごと」変更を加えてください(この仕様はあとで変更するかもしれません)。    
+get()または__get()で「存在しないカラム名」を指定した場合は、 \ErrorException の例外を投げます。    
 
 また、データ全体を取得したい時は「toArray()」メソッドで「ハッシュ配列」を取り出す事ができます。    
+取り出すハッシュで「このカラムは省きたい」ような場合は、 $suppressToArray プロパティにカラム名を指定してください。    
 
 ## 検索
 
