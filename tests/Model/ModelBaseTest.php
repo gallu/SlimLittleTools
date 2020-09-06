@@ -49,6 +49,14 @@ CREATE TABLE model_date (
   PRIMARY KEY(mode_date_id)
 );
 
+DROP TABLE IF EXISTS model_users;
+CREATE TABLE model_users (
+  mode_users_id INT NOT NULL AUTO_INCREMENT,
+  password VARBINARY(256) NOT NULL,
+  email VARBINARY(256) NOT NULL,
+  s VARCHAR(512),
+  PRIMARY KEY(mode_users_id)
+);
 
 */
 
@@ -259,6 +267,48 @@ class TestGetProperty extends ModelBase
 private static $test;
 }
 
+// getProperty テスト用
+class TestUsers extends ModelBase
+{
+
+    protected $table = 'model_users';
+    protected $pk = 'mode_users_id';
+    protected $auto_increment = true; // AUTO_INCREMENTがPKなテーブル
+
+    protected $guard = ['email', 'password'];
+
+    // insert / update共通
+    protected $validate = [
+        'password' => 'required|compare_with|range_length:8-72',
+        'email' => 'required|compare_with|email',
+    ];
+
+    //
+    protected static function finalDataAdjustment(array $data, string $type, ?ModelBase $model = null)
+    {
+        // update時のパスワード変更用のギミック
+        if ('update' === $type) {
+            if (true === isset($data['now_password'])) {
+                if (false === password_verify(strval($data['now_password']), $model->password)) {
+                    // XXX
+                    throw new \ErrorException('不一致');
+                }
+                // 認証が通ったらnow_password自体は削除する
+                unset($data['now_password']);
+            }
+        }
+
+        // 正常に通ってきた時用のパスワードhash化ギミック
+        if (isset($data['password'])) {
+            $data['password'] = password_hash($data['password'],  PASSWORD_DEFAULT, ['cost' => 11]);
+        }
+
+        //
+        return $data;
+    }
+
+}
+
 // テスト用モデル
 class TestSuppressToArray extends ModelBase
 {
@@ -326,6 +376,7 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
         $dbh->query('TRUNCATE TABLE mode_2;');
         $dbh->query('TRUNCATE TABLE mode_3;');
         $dbh->query('TRUNCATE TABLE model_date;');
+        $dbh->query('TRUNCATE TABLE model_users;');
 
         // checkPkの確認
         // 単キー 2種
@@ -600,6 +651,128 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
         $this->assertSame($awk['mode_1_id'], '123');
         $this->assertSame(isset($awk['val2']), false);
         $this->assertSame($model->val2, '22222');
+        //
+        $model->delete();
+
+        // ユーザ系テスト
+        // 足りなければNG
+        $flg = false;
+        try {
+            TestUsers::insert(['password' => 'abc', 'email' => 'abc']);
+        } catch (\Throwable $e) {
+            $eobj = $e->getErrorObj();
+            $this->assertSame(in_array('compare_with', $eobj['password'], true), true);
+            $this->assertSame(in_array('range_length', $eobj['password'], true), true);
+            //
+            $this->assertSame(in_array('compare_with', $eobj['email'], true), true);
+            $this->assertSame(in_array('email', $eobj['email'], true), true);
+            //
+            $flg = true;
+        }
+        // else
+        $this->assertTrue($flg);
+
+        // 足りてたらinsertできる
+        $raw_pass = 'password_string';
+        $model = TestUsers::insert(['password' => $raw_pass, 'password_check' => $raw_pass, 'email' => 'test@example.com', 'email_check' => 'test@example.com', 's' => 'test']);
+        $this->assertNotSame($model, null);
+        $user_id = $model->mode_users_id;
+        // パスワードがハッシュされている
+        $this->assertTrue(password_verify($raw_pass, $model->password));
+
+        // パスワードがハッシュされている(selectデータ)
+        $model = TestUsers::find($user_id);
+        $this->assertTrue(password_verify($raw_pass, $model->password));
+
+        // s(ガードされていない項目)はアップデート出来る
+        $model = TestUsers::find($user_id);
+        $r = $model->update(['s' => 'abcdefg']);
+        $this->assertTrue($r);
+
+        // emailとpassは、ガードされてるからアップデート出来ない
+        $flg = false;
+        try {
+            $model->update(['email' => 'test2@example.com', 'email_check' => 'test2@example.com']);
+        } catch (\Throwable $e) {
+            $this->assertSame(get_class($e), \SlimLittleTools\Exception\ModelGuardException::class);
+            $flg = true;
+        }
+        // else
+        $this->assertTrue($flg);
+
+        // email ガードを外したけど不一致
+        $flg = false;
+        $model = TestUsers::find($user_id);
+        try {
+            $model->unlockGuard(['email']);
+            $model->update(['email' => 'test2@example.com', 'email_check' => 'test@example.com']);
+        } catch (\Throwable $e) {
+            $this->assertSame(get_class($e), \SlimLittleTools\Exception\ModelValidateException::class);
+            $eobj = $e->getErrorObj();
+            $this->assertSame(in_array('compare_with', $eobj['email'], true), true);
+            $flg = true;
+        }
+        // else
+        $this->assertTrue($flg);
+
+        // email ガードを外して一致
+        $model = TestUsers::find($user_id);
+        $this->assertSame($model->email, 'test@example.com');
+        $model->unlockGuard(['email']);
+        $r = $model->update(['email' => 'test2@example.com', 'email_check' => 'test2@example.com']);
+        $this->assertTrue($r);
+        $this->assertSame($model->email, 'test2@example.com');
+        //
+        $model = TestUsers::find($user_id);
+        $this->assertSame($model->email, 'test2@example.com');
+
+        //
+        $new_pass = 'new_pass_string';
+
+        // pass ガードを外したけど現在パスワードと不一致
+        $flg = false;
+        $model = TestUsers::find($user_id);
+        try {
+            $model->unlockGuard(['password']);
+            $model->update(['password' => $new_pass, 'password_check' => $new_pass, 'now_password' => "a{$raw_pass}"]);
+        } catch (\Throwable $e) {
+            $this->assertSame(get_class($e), \ErrorException::class);
+            $this->assertSame($e->getMessage(), '不一致');
+            $flg = true;
+        }
+        // else
+        $this->assertTrue($flg);
+
+        // pass ガードを外したけどパスワードが不一致
+        $flg = false;
+        $model = TestUsers::find($user_id);
+        try {
+            $model->unlockGuard(['password']);
+            $model->update(['password' => $new_pass, 'password_check' => "a{$new_pass}", 'now_password' => $raw_pass]);
+        } catch (\Throwable $e) {
+            $eobj = $e->getErrorObj();
+            $this->assertSame(in_array('compare_with', $eobj['password'], true), true);
+            $flg = true;
+        }
+        // else
+        $this->assertTrue($flg);
+
+        // pass ガードを外して一致
+        $flg = false;
+        $model = TestUsers::find($user_id);
+        $model->unlockGuard(['password']);
+        $r = $model->update(['password' => $new_pass, 'password_check' => $new_pass, 'now_password' => $raw_pass]);
+        $this->assertTrue($r);
+
+        // パスワードがハッシュされている
+        $this->assertTrue(password_verify($new_pass, $model->password));
+        $this->assertFalse(password_verify($raw_pass, $model->password));
+
+        // パスワードがハッシュされている(selectデータ)
+        $model = TestUsers::find($user_id);
+        $this->assertTrue(password_verify($new_pass, $model->password));
+
+
         //
         $model->delete();
     }

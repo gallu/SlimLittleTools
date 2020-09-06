@@ -375,6 +375,18 @@ class Validator
         return false;
     }
 
+    /**
+     * email
+     */
+    public static function validateExecEmail($datum, $param)
+    {
+        if (false === filter_var($datum, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+        return true;
+    }
+
+
     //private:
     private $result_flg = true;
     private $checked_colmun = [];

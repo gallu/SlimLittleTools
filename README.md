@@ -73,7 +73,6 @@ PDOとあるが、実際には拡張されたPDOクラス
 値が「正しいか」のチェック    
 ※ required無し、かつ入力が空文字の場合は、validateはtrueを返します
 
-
 - required  必須チェック 
 - datetime  日次フォーマットチェック
 - alpha  アルファベット 
@@ -94,6 +93,7 @@ PDOとあるが、実際には拡張されたPDOクラス
 - tel  電話番号形式( ハイフン、スペース、数字のみは一通り対応)であること
 - hirakana　文字がすべて「全角ひらがな(かスペース(全角半角ともOK))」でること
 - katakana　文字がすべて「全角カタカナ(かスペース(全角半角ともOK))」でること
+- email　emailフォーマットである事(filter_var()のFILTER_VALIDATE_EMAILを使ってます)
 
 ## ./Libs/Http:
 
