@@ -267,7 +267,7 @@ class TestGetProperty extends ModelBase
 private static $test;
 }
 
-// getProperty テスト用
+// user系 テスト用
 class TestUsers extends ModelBase
 {
 
