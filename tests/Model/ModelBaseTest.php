@@ -339,7 +339,7 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
                     'user' => 'slim_tools',
                     'pass' => 'XXXXXX',
                     'charset' => 'utf8mb4',
-                    'options' => [\PDO::ATTR_EMULATE_PREPARES => false],
+                    'options' => [\PDO::ATTR_EMULATE_PREPARES => false, \PDO::ATTR_ERRMODE => \PDO::ERRMODE_SILENT],
                 ],
             ],
         ];

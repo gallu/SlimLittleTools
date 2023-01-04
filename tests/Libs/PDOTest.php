@@ -74,7 +74,7 @@ INSERT INTO prepared_query_test(prepared_query_test_id, val, val2) VALUES(4, '4_
         //
         $pre = $dbh->preparedQuery('SELECT * FROM prepared_query_test WHERE val = :val;', ['val' => '3_val']);
         $data = $pre->fetch();
-        $this->assertSame($data['prepared_query_test_id'], '3');
+        $this->assertSame($data['prepared_query_test_id'], 3);
         $this->assertSame($data['val'], '3_val');
         $this->assertSame($data['val2'], '3_val2');
     }

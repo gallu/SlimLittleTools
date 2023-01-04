@@ -26,7 +26,7 @@ class DB extends WithStaticContainerBase
                 // nameからdataの取得
                 $data = $this->container->get('settings')[$name];
                 // 接続クラスに投げる
-                $class = (string)@$data['connect_class'];
+                $class = (string)($data['connect_class'] ?? '');
                 if ('' === $class) {
                     $class = '\SlimLittleTools\Libs\ConnectPDO';
                 }

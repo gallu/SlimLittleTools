@@ -64,7 +64,7 @@ class PDO extends \PDO
     }
 
     //
-    public function beginTransaction()
+    public function beginTransaction(): bool
     {
         $r = parent::beginTransaction();
         if (true === $r) {
@@ -74,7 +74,7 @@ class PDO extends \PDO
     }
 
     //
-    public function rollBack()
+    public function rollBack(): bool
     {
         $r = parent::rollBack();
         if (true === $r) {
@@ -84,7 +84,7 @@ class PDO extends \PDO
     }
 
     //
-    public function commit()
+    public function commit(): bool
     {
         $r = parent::commit();
         if (true === $r) {
