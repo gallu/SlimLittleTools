@@ -328,6 +328,9 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
     // 一回だけ実行される開始前メソッド
     public static function setUpBeforeClass() : void
     {
+        //
+        parent::setUpBeforeClass();
+
         // DBハンドル用の設定をcontainerに入れておく
         $settings = [
             'settings' => [

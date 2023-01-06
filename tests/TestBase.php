@@ -17,6 +17,22 @@ use Slim\App;
 class TestBase extends \PHPUnit\Framework\TestCase
 {
     //
+    public static function setUpBeforeClass(): void
+    {
+        //
+        parent::setUpBeforeClass();
+
+        // Noticeであろうとも、エラーが出たら速やかに例外をぶん投げる
+        set_error_handler(
+          function ($errno, $errstr, $errfile, $errline) {
+            if (0 !== $errno & error_reporting()) {
+                throw new ErrorException( $errstr, 0, $errno, $errfile, $errline);
+            }
+          }
+        );
+    }
+
+    //
     public static function getContainer($settings = []) : ContainerInterface
     {
         $containerBuilder = new ContainerBuilder();
