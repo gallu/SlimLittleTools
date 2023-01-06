@@ -48,7 +48,7 @@ class Validator
                     $r = $self->validateExecCompare_with($data, $con_name);
                 } else {
                     // パラメタの切り分け
-                    @list($rule, $param) = explode(':', $rule, 2); // XXX エラーチェックはざっくり
+                    list($rule, $param) = [...(explode(':', $rule, 2)), null];
 
                     // required だったらチェックを入れておく
                     if ('required' === $rule) {
@@ -64,7 +64,7 @@ class Validator
 
                     // 処理関数の実行
                     // XXX 必須じゃないときは「keyすらも存在していない」可能性があるので、dataチェックは入れない
-                    $r = static::$method((string)@$data[$con_name], $param);
+                    $r = static::$method((string)($data[$con_name] ?? null), $param);
                 }
                 //
                 if (false === $r) {

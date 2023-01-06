@@ -13,6 +13,9 @@ class ContainerTest extends \SlimLittleTools\Tests\TestBase
     // 一回だけ実行される開始前メソッド
     public static function setUpBeforeClass() : void
     {
+        //
+        parent::setUpBeforeClass();
+        //
         $settings = [
             'settings' => [
                 'displayErrorDetails' => true, // set to false in production
