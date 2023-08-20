@@ -7,3 +7,4 @@ phpunit.xml
 .swp
 .php_cs.cache
 php-cs-fixer
+.phpunit.result.cache

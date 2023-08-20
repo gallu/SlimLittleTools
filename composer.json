@@ -10,7 +10,6 @@
     ],
     "require": {
         "php": "^7.4 || ^8.0",
-        "friendsofphp/php-cs-fixer": "^2.16",
         "slim/csrf": "^1.0",
         "slim/slim": "^4.0",
         "phpunit/phpunit": "^9.1",
@@ -18,6 +17,7 @@
         "php-di/php-di": "^6.1"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.0"
     },
     "autoload": {
         "psr-4": {
