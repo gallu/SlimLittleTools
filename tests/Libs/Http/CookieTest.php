@@ -28,7 +28,7 @@ class CookieTest extends \PHPUnit\Framework\TestCase
         $headers = $cookies->toHeaders();
         $this->assertSame(in_array('bbb=200; secure; HostOnly', $headers), true);
         $this->assertSame(in_array('eee=test', $headers), true);
-        $this->assertSame(in_array('ddd=; expires=Thu, 01-Jan-1970 00:00:01 UTC; HttpOnly', $headers), true);
+        $this->assertSame(in_array('ddd=; expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly', $headers), true);
         $this->assertSame(in_array('fff=test; SameSite=Strict', $headers), true);
 
         //
