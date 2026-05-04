@@ -10,8 +10,15 @@ use SlimLittleTools\Libs\Http\Request;
 use Slim\Http\Environment;
 
 /*
+-- テスト用データベース作成
+CREATE DATABASE IF NOT EXISTS slim_tools CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS 'slim_tools'@'localhost' IDENTIFIED BY 'ここにパスワード';
+CREATE USER IF NOT EXISTS 'slim_tools'@'%'         IDENTIFIED BY 'ここにパスワード';
+GRANT ALL PRIVILEGES ON slim_tools.* TO 'slim_tools'@'localhost';
+GRANT ALL PRIVILEGES ON slim_tools.* TO 'slim_tools'@'%';
+FLUSH PRIVILEGES;
 
-テスト用テーブル
+-- テスト用テーブル
 DROP TABLE IF EXISTS mode_1;
 CREATE TABLE mode_1 (
   mode_1_id VARCHAR(64) NOT NULL,
@@ -336,11 +343,12 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
             'settings' => [
                 //
                 'db' => [
-                    'driver' => 'mysql',
-                    'host' => 'localhost',
-                    'database' => 'slim_tools',
-                    'user' => 'slim_tools',
-                    'pass' => 'XXXXXX',
+                    'driver' => $_ENV['DB_DRIVER'] ?? 'mysql',
+                    'host' => $_ENV['DB_HOST'] ?? 'mysql',
+                    'database' => $_ENV['DB_DATABASE'] ?? 'slim_tools',
+                    'port' => $_ENV['DB_PORT'] ?? 3306,
+                    'user' => $_ENV['DB_USER'] ?? throw new \ErrorException('DB_USER is not set'),
+                    'pass' => $_ENV['DB_PASS'] ?? throw new \ErrorException('DB_PASS is not set'),
                     'charset' => 'utf8mb4',
                     'options' => [\PDO::ATTR_EMULATE_PREPARES => false, \PDO::ATTR_ERRMODE => \PDO::ERRMODE_SILENT],
                 ],
@@ -354,7 +362,7 @@ class ModelBaseTest extends \SlimLittleTools\Tests\TestBase
     protected function setUp() : void
     {
         // リアルなDB接続が必要なので、一旦スキップ
-        $this->markTestSkipped();
+        // $this->markTestSkipped();
     }
     // -----
     // テストメソッドごとの終了メソッド

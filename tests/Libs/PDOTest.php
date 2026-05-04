@@ -12,8 +12,8 @@ class PDOTest extends \SlimLittleTools\Tests\TestBase
     {
         static $dbh = null;
         if (null === $dbh) {
-            // XXX
-            $dbh = new PDO('mysql:dbname=slim_tools;host=127.0.0.1', 'slim_tools', 'slim_tools');
+            //$dbh = new PDO('mysql:dbname=slim_tools;host=127.0.0.1', 'slim_tools', 'slim_tools');
+            $dbh = new PDO('mysql:dbname=slim_tools;host=mysql', 'slim_tools', 'slim_tools');
         }
         return $dbh;
     }
